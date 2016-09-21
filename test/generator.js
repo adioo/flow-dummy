@@ -8,7 +8,6 @@ const iri_end = '> ';
 const onEnd = domain + 'INSTANCE/onEnd>';
 const onError = domain + 'INSTANCE/onError>';
 
-let string = '';
 let instance;
 let instance_iri;
 let step;
@@ -32,7 +31,6 @@ for (step = 0; num_instances > step; ++step) {
     instance = UID(8);
     instance_iri = domain + instance + iri_end;
     instances.push(instance_iri);
-    //string += createInstance(instance_iri, instance);
     process.stdout.write(createInstance(instance_iri, instance));
 
     // event
@@ -42,7 +40,6 @@ for (step = 0; num_instances > step; ++step) {
         event_iri = domain + instance + '/' + event + iri_end;
         events.push(event_iri);
         first_sequence = '_:' + UID(8);
-        //string += createEvent(instance_iri, event_iri, event, first_sequence);
         process.stdout.write(createEvent(instance_iri, event_iri, event, first_sequence));
 
         // sequence
@@ -56,7 +53,6 @@ for (step = 0; num_instances > step; ++step) {
             // select random event
             if (handler_type > 1) {
                 target = events[random(0, events.length - 1)];
-                //string += createEventHandler(target, first_sequence, sequence);
                 process.stdout.write(createEventHandler(target, first_sequence, sequence));
 
             // select random instance
@@ -64,10 +60,8 @@ for (step = 0; num_instances > step; ++step) {
                 target = instances[random(0, instances.length - 1)];
 
                 if (handler_type === 0) {
-                    //string += createDataHandler(target, first_sequence, sequence);
                     process.stdout.write(createDataHandler(target, first_sequence, sequence));
                 } else {
-                    //string += createStreamHandler(target, first_sequence, sequence);
                     process.stdout.write(createStreamHandler(target, first_sequence, sequence));
                 }
             }
