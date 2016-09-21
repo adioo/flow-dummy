@@ -23,6 +23,9 @@ let handler_type;
 let target;
 let sStep;
 
+// TODO create ids, then the triples
+// TODO select onError and onEnd from cached events
+
 for (step = 0; num_instances > step; ++step) {
 
     // instance
@@ -32,9 +35,7 @@ for (step = 0; num_instances > step; ++step) {
     //string += createInstance(instance_iri, instance);
     process.stdout.write(createInstance(instance_iri, instance));
 
-    // TODO create onError onEnd event on first instance
-
-    // events
+    // event
     num_events = random(1, 23);
     for (eStep = 0; num_events > eStep; ++eStep) {
         event = UID(8);
