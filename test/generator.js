@@ -1,3 +1,5 @@
+'use strict'
+
 const num_instances = process.argv[2] || 42;
 const instances = [];
 const events = [];
