@@ -92,27 +92,26 @@ function random (min, max) {
 function createInstance (iri, name) {
     let s = iri + '<http://schema.org/name> "\\"' + name + '\\"" .\n' +
             iri + '<http://schema.jillix.net/vocab/roles> "\\"*\\"" .\n' +
+            iri + '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.jillix.net/vocab/ModuleInstanceConfig> .\n' +
             iri + '<http://schema.jillix.net/vocab/module> <https://raw.githubusercontent.com/adioo/flow-dummy/master/module.json> .\n';
 
-    //iri + <http://schema.jillix.net/vocab/event> <http://domain.com/_i/api_main_router/event/forwardToApiRouter> .
-    //iri + <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.jillix.net/vocab/ModuleInstanceConfig> .
     return s;
 };
 
 function createEvent (inst, iri, name, sequence) {
-    // create basic event triples
-    // create sequence (data, event, stream)
     let s = inst + '<http://schema.jillix.net/vocab/event> ' + iri + '.\n' +
             iri + '<http://schema.jillix.net/vocab/onError> ' + onError + ' .\n' +
             iri + '<http://schema.jillix.net/vocab/onEnd> ' + onEnd + ' .\n' +
             iri + '<http://schema.org/name> "\\"' + name + '\\"" .\n' +
+            iri + '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.jillix.net/vocab/FlowEvent> .\n' +
             iri + '<http://schema.jillix.net/vocab/sequence> ' + sequence + ' .\n';
-    //iri + <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.jillix.net/vocab/FlowEvent> .' 
+
     return s;
 };
 
 function createEventHandler(event, seq, nextSeq) {
-    let s = seq + ' <http://schema.jillix.net/vocab/emit> ' + event + '.\n';
+    let s = seq + ' <http://schema.jillix.net/vocab/emit> ' + event + '.\n' +
+            seq + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.jillix.net/vocab/EventEmit> .\n';
 
     if (nextSeq) {
         s += seq + ' <http://schema.jillix.net/vocab/sequence> ' + nextSeq + ' .\n';
@@ -123,6 +122,7 @@ function createEventHandler(event, seq, nextSeq) {
 
 function createDataHandler(instance, seq, nextSeq) {
     let s = seq + ' <http://schema.jillix.net/vocab/instance> ' + instance + '.\n' +
+            seq + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.jillix.net/vocab/DataHandler> .\n' +
             seq + ' <http://schema.jillix.net/vocab/dataHandler> ' +
             '<https://raw.githubusercontent.com/adioo/flow-dummy/master/module.json#data> .\n';
 
@@ -135,6 +135,7 @@ function createDataHandler(instance, seq, nextSeq) {
 
 function createStreamHandler(instance, seq, nextSeq) {
     let s = seq + ' <http://schema.jillix.net/vocab/instance> ' + instance + '.\n' +
+            seq + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.jillix.net/vocab/StreamHandler> .\n' +
             seq + ' <http://schema.jillix.net/vocab/streamHandler> ' +
             '<https://raw.githubusercontent.com/adioo/flow-dummy/master/module.json#stream> .\n';
 
