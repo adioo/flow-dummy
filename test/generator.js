@@ -1,10 +1,10 @@
 const num_instances = process.argv[2] || 42;
 const instances = [];
 const events = [];
-const domain = '<http:doma.in/_i/';
+const domain = '<http://doma.in/_i/';
 const iri_end = '> ';
-const onEnd = domain + '[INSTANCE]/onEnd>';
-const onError = domain + '[INSTANCE]/onError>';
+const onEnd = domain + 'INSTANCE/onEnd>';
+const onError = domain + 'INSTANCE/onError>';
 
 let string = '';
 let instance;
