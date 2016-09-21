@@ -90,8 +90,8 @@ function random (min, max) {
 
 // create basic instance triples
 function createInstance (iri, name) {
-    let s = iri + '<http://schema.org/name> "\"' + name + '\"" .\n' +
-            iri + '<http://schema.jillix.net/vocab/roles> "\"*\"" .\n' +
+    let s = iri + '<http://schema.org/name> "\\"' + name + '\\"" .\n' +
+            iri + '<http://schema.jillix.net/vocab/roles> "\\"*\\"" .\n' +
             iri + '<http://schema.jillix.net/vocab/module> <https://raw.githubusercontent.com/adioo/flow-dummy/master/module.json> .\n';
 
     //iri + <http://schema.jillix.net/vocab/event> <http://domain.com/_i/api_main_router/event/forwardToApiRouter> .
@@ -105,7 +105,7 @@ function createEvent (inst, iri, name, sequence) {
     let s = inst + '<http://schema.jillix.net/vocab/event> ' + iri + '.\n' +
             iri + '<http://schema.jillix.net/vocab/onError> ' + onError + ' .\n' +
             iri + '<http://schema.jillix.net/vocab/onEnd> ' + onEnd + ' .\n' +
-            iri + '<http://schema.org/name> "\"' + name + '\"" .\n' +
+            iri + '<http://schema.org/name> "\\"' + name + '\\"" .\n' +
             iri + '<http://schema.jillix.net/vocab/sequence> ' + sequence + ' .\n';
     //iri + <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.jillix.net/vocab/FlowEvent> .' 
     return s;
