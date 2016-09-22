@@ -32,6 +32,7 @@ for (step = 0; num_instances > step; ++step) {
     instance_iri = domain + instance + iri_end;
     instances.push(instance_iri);
     process.stdout.write(createInstance(instance_iri, instance));
+    process.stdout.write(createArguments(instance_iri, '_:' + UID(8)));
 
     // event
     num_events = random(1, 23);
@@ -65,6 +66,9 @@ for (step = 0; num_instances > step; ++step) {
                     process.stdout.write(createStreamHandler(target, first_sequence, sequence));
                 }
             }
+
+            // generate sequence arguments
+            process.stdout.write(createArguments(first_sequence, '_:' + UID(8)));
 
             first_sequence = sequence;
         }
@@ -139,6 +143,13 @@ function createStreamHandler(instance, seq, nextSeq) {
     if (nextSeq) {
         s += seq + ' <http://schema.jillix.net/vocab/sequence> ' + nextSeq + ' .\n';
     }
+
+    return s;
+};
+
+function createArguments (subject, args) {
+    let s = subject + ' <http://schema.jillix.net/vocab/args> ' + args + ' .\n' +
+            args + ' <http://schema.org/name> "\\"Name\\"" .\n';
 
     return s;
 };
