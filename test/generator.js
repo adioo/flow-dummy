@@ -3,6 +3,7 @@
 const num_instances = process.argv[2] || 42;
 const instances = [];
 const events = [];
+const dependencies = [];
 const domain = '<http://doma.in/_i/';
 const iri_end = '> ';
 const onEnd = domain + 'INSTANCE/onEnd>';
@@ -70,11 +71,30 @@ for (step = 0; num_instances > step; ++step) {
             // select random event
             if (handler_type > 1) {
                 target = events[random(0, events.length - 1)];
+
+                // add target to dependency list
+                let dependencyInstance = '<http://doma.in/_i/' + instance +'>';
+                let dependencyTarget = target.substring(0, target.lastIndexOf('/')) + '>';
+                let dependency = dependencyInstance + ' <http://schema.jillix.net/vocab/dependency> ' + dependencyTarget + ' .\n';
+                if (dependencies.indexOf(dependency) < 0 && dependencyInstance !== dependencyTarget) {
+                    dependencies.push(dependency);
+                    process.stdout.write(dependency);
+                }
+
                 process.stdout.write(createEventHandler(target, first_sequence, sequence));
 
             // select random instance
             } else {
                 target = instances[random(0, instances.length - 1)];
+
+                // add target to dependency list
+                let dependencyInstance = '<http://doma.in/_i/' + instance +'>';
+                let dependencyTarget = target.trim();
+                let dependency = dependencyInstance + ' <http://schema.jillix.net/vocab/dependency> ' + dependencyTarget + ' .\n';
+                if (dependencies.indexOf(dependency) < 0 && dependencyInstance !== dependencyTarget) {
+                    dependencies.push(dependency);
+                    process.stdout.write(dependency);
+                }
 
                 if (handler_type === 0) {
                     process.stdout.write(createDataHandler(target, first_sequence, sequence));
