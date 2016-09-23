@@ -1,0 +1,30 @@
+{
+    "@context": [
+        "http://schema.jillix.net/context/module.jsonld",
+        {
+        }
+    ],
+    "@id": "https://raw.githubusercontent.com/adioo/flow-dummy/master/module.json",
+    "@type": "Module",
+    "name": "flow-dummy",
+    "version": "0.0.1",
+    "description": "Flow dummy module and data generator.",
+    "author": "Adrian Ottiker <adrian@ottiker.com>",
+    "gitRepository": "git+https://github.com/adioo/flow-dummy.git",
+    "exports": [
+        {
+            "@id": "https://raw.githubusercontent.com/adioo/flow-dummy/master/module.json#data",
+            "@type": "DataHandler",
+            "name": "data",
+            "args": []
+        },
+        {
+            "@id": "https://raw.githubusercontent.com/adioo/flow-dummy/master/module.json#stream",
+            "@type": "StreamHandler",
+            "name": "stream",
+            "args": []
+        }
+    ],
+    "args": [
+    ]
+}

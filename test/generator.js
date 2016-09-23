@@ -25,6 +25,22 @@ let sStep;
 // TODO create ids, then the triples
 // TODO select onError and onEnd from cached events
 
+// module descriptor
+process.stdout.write(
+    '<https://raw.githubusercontent.com/adioo/flow-dummy/master/module.json#data> <http://schema.org/name> "\\"data\\"" .\n' +
+    '<https://raw.githubusercontent.com/adioo/flow-dummy/master/module.json#data> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.jillix.net/vocab/DataHandler> .\n' +
+    '<https://raw.githubusercontent.com/adioo/flow-dummy/master/module.json#stream> <http://schema.org/name> "\\"stream\\"" .\n' +
+    '<https://raw.githubusercontent.com/adioo/flow-dummy/master/module.json#stream> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.jillix.net/vocab/StreamHandler> .\n' +
+    '<https://raw.githubusercontent.com/adioo/flow-dummy/master/module.json> <http://dbpedia.org/property/exports> <https://raw.githubusercontent.com/adioo/flow-dummy/master/module.json#data> .\n' +
+    '<https://raw.githubusercontent.com/adioo/flow-dummy/master/module.json> <http://dbpedia.org/property/exports> <https://raw.githubusercontent.com/adioo/flow-dummy/master/module.json#stream> .\n' +
+    '<https://raw.githubusercontent.com/adioo/flow-dummy/master/module.json> <http://schema.org/author> "\\"Adrian Ottiker <adrian@ottiker.com>\\"" .\n' +
+    '<https://raw.githubusercontent.com/adioo/flow-dummy/master/module.json> <http://schema.org/codeRepository> <git+https://github.com/adioo/flow-dummy.git> .\n' +
+    '<https://raw.githubusercontent.com/adioo/flow-dummy/master/module.json> <http://schema.org/description> "\\"Flow dummy module and data generator.\\"" .\n' +
+    '<https://raw.githubusercontent.com/adioo/flow-dummy/master/module.json> <http://schema.org/name> "\\"flow-dummy\\"" .\n' +
+    '<https://raw.githubusercontent.com/adioo/flow-dummy/master/module.json> <http://schema.org/softwareVersion> "\\"0.0.1\\"" .\n' +
+    '<https://raw.githubusercontent.com/adioo/flow-dummy/master/module.json> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.org/SoftwareSourceCode> .\n'
+);
+
 for (step = 0; num_instances > step; ++step) {
 
     // instance
