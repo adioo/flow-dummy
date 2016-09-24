@@ -1,6 +1,10 @@
 'use strict'
 
-const num_instances = process.argv[2] || 42;
+const settings = {
+    instances: process.argv[2] || 42,
+    events: [process.argv[3] || 1, process.argv[4] || 5],
+    handlers: [process.argv[5] || 1, process.argv[6] || 5]
+};
 const instances = [];
 const events = [];
 const instances_to_connect = {};
@@ -45,7 +49,7 @@ process.stdout.write(
     '<https://raw.githubusercontent.com/adioo/flow-dummy/master/module.json> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.org/SoftwareSourceCode> .\n'
 );
 
-for (step = 0; num_instances > step; ++step) {
+for (step = 0; settings.instances > step; ++step) {
 
     // instance
     instance = UID(8);
@@ -57,7 +61,7 @@ for (step = 0; num_instances > step; ++step) {
     instances_to_connect[instance_iri] = {};
 
     // event
-    num_events = random(1, 23);
+    num_events = random(settings.events[0], settings.events[1]);
     for (eStep = 0; num_events > eStep; ++eStep) {
         event = UID(8);
         event_iri = domain + instance + '/' + event + iri_end;
@@ -66,7 +70,7 @@ for (step = 0; num_instances > step; ++step) {
         process.stdout.write(createEvent(instance_iri, event_iri, event, current_handler));
 
         // handler
-        num_handler = random(1, 23);
+        num_handler = random(settings.handlers[0], settings.handlers[1]);
         for (hStep = 0; num_handler > hStep; ++hStep) {
 
             next_handler = hStep === (num_handler - 1) ? null : '_:' + UID(8);
