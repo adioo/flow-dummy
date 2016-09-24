@@ -70,16 +70,16 @@ for (step = 0; num_instances > step; ++step) {
             // select random event
             if (handler_type > 1) {
                 target = events[random(0, events.length - 1)];
-                process.stdout.write(createEventHandler(target, first_sequence, sequence));
+                process.stdout.write(createEventHandler(target, first_sequence, sequence, event_iri));
 
             // select random instance
             } else {
                 target = instances[random(0, instances.length - 1)];
 
                 if (handler_type === 0) {
-                    process.stdout.write(createDataHandler(target, first_sequence, sequence));
+                    process.stdout.write(createDataHandler(target, first_sequence, sequence, event_iri));
                 } else {
-                    process.stdout.write(createStreamHandler(target, first_sequence, sequence));
+                    process.stdout.write(createStreamHandler(target, first_sequence, sequence, event_iri));
                 }
             }
 
@@ -126,8 +126,9 @@ function createEvent (inst, iri, name, sequence) {
     return s;
 };
 
-function createEventHandler(event, seq, nextSeq) {
+function createEventHandler(event, seq, nextSeq, root_event) {
     let s = seq + ' <http://schema.jillix.net/vocab/emit> ' + event + '.\n' +
+            seq + ' <http://schema.jillix.net/vocab/event> ' + root_event + ' .\n' +
             seq + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.jillix.net/vocab/EventEmit> .\n';
 
     if (nextSeq) {
@@ -137,8 +138,9 @@ function createEventHandler(event, seq, nextSeq) {
     return s;
 };
 
-function createDataHandler(instance, seq, nextSeq) {
+function createDataHandler(instance, seq, nextSeq, root_event) {
     let s = seq + ' <http://schema.jillix.net/vocab/instance> ' + instance + '.\n' +
+            seq + ' <http://schema.jillix.net/vocab/event> ' + root_event + ' .\n' +
             seq + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.jillix.net/vocab/DataHandler> .\n' +
             seq + ' <http://schema.jillix.net/vocab/dataHandler> ' +
             '<https://raw.githubusercontent.com/adioo/flow-dummy/master/module.json#data> .\n';
@@ -150,8 +152,9 @@ function createDataHandler(instance, seq, nextSeq) {
     return s;
 };
 
-function createStreamHandler(instance, seq, nextSeq) {
+function createStreamHandler(instance, seq, nextSeq, root_event) {
     let s = seq + ' <http://schema.jillix.net/vocab/instance> ' + instance + '.\n' +
+            seq + ' <http://schema.jillix.net/vocab/event> ' + root_event + ' .\n' +
             seq + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.jillix.net/vocab/StreamHandler> .\n' +
             seq + ' <http://schema.jillix.net/vocab/streamHandler> ' +
             '<https://raw.githubusercontent.com/adioo/flow-dummy/master/module.json#stream> .\n';
