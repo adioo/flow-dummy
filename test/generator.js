@@ -15,13 +15,13 @@ let step;
 let num_events;
 let event;
 let event_iri;
-let first_sequence;
+let current_handler;
 let eStep
-let num_sequence;
-let sequence;
+let num_handler;
+let next_handler;
 let handler_type;
 let target;
-let sStep;
+let hStep;
 
 // TODO create ids, then the triples
 // TODO select onError and onEnd from cached events
@@ -57,15 +57,14 @@ for (step = 0; num_instances > step; ++step) {
         event = UID(8);
         event_iri = domain + instance + '/' + event + iri_end;
         events.push(event_iri);
-        first_sequence = '_:' + UID(8);
-        process.stdout.write(createEvent(instance_iri, event_iri, event, first_sequence));
+        current_handler = '_:' + UID(8);
+        process.stdout.write(createEvent(instance_iri, event_iri, event, current_handler));
 
-        // sequence
-        num_sequence = random(1, 23);
-        for (sStep = 0; num_sequence > sStep; ++sStep) {
+        // handler
+        num_handler = random(1, 23);
+        for (hStep = 0; num_handler > hStep; ++hStep) {
 
-            // first_seq > seq > seq > seq ..
-            sequence = sStep === (num_sequence - 1) ? null : '_:' + UID(8);
+            next_handler = hStep === (num_handler - 1) ? null : '_:' + UID(8);
             handler_type = random(0, 2);
 
             // select random event
@@ -81,7 +80,7 @@ for (step = 0; num_instances > step; ++step) {
                     process.stdout.write(dependency);
                 }
 
-                process.stdout.write(createEventHandler(target, first_sequence, sequence, event_iri));
+                process.stdout.write(createEventHandler(target, current_handler, next_handler, event_iri));
 
             // select random instance
             } else {
@@ -97,16 +96,16 @@ for (step = 0; num_instances > step; ++step) {
                 }
 
                 if (handler_type === 0) {
-                    process.stdout.write(createDataHandler(target, first_sequence, sequence, event_iri));
+                    process.stdout.write(createDataHandler(target, current_handler, next_handler, event_iri));
                 } else {
-                    process.stdout.write(createStreamHandler(target, first_sequence, sequence, event_iri));
+                    process.stdout.write(createStreamHandler(target, current_handler, next_handler, event_iri));
                 }
             }
 
-            // generate sequence arguments
-            process.stdout.write(createArguments(first_sequence, '_:' + UID(8)));
+            // generate handler arguments
+            process.stdout.write(createArguments(current_handler, '_:' + UID(8)));
 
-            first_sequence = sequence;
+            current_handler = next_handler;
         }
     }
 }
@@ -135,52 +134,52 @@ function createInstance (iri, name) {
     return s;
 };
 
-function createEvent (inst, iri, name, sequence) {
+function createEvent (inst, iri, name, next_handler) {
     let s = inst + '<http://schema.jillix.net/vocab/event> ' + iri + '.\n' +
             iri + '<http://schema.jillix.net/vocab/onError> ' + onError + ' .\n' +
             iri + '<http://schema.jillix.net/vocab/onEnd> ' + onEnd + ' .\n' +
             iri + '<http://schema.org/name> "\\"' + name + '\\"" .\n' +
             iri + '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.jillix.net/vocab/FlowEvent> .\n' +
-            iri + '<http://schema.jillix.net/vocab/sequence> ' + sequence + ' .\n';
+            iri + '<http://schema.jillix.net/vocab/sequence> ' + next_handler + ' .\n';
 
     return s;
 };
 
-function createEventHandler(event, seq, nextSeq, root_event) {
-    let s = seq + ' <http://schema.jillix.net/vocab/emit> ' + event + '.\n' +
-            seq + ' <http://schema.jillix.net/vocab/event> ' + root_event + ' .\n' +
-            seq + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.jillix.net/vocab/EventEmit> .\n';
+function createEventHandler(event, handler, next_handler, event_ref) {
+    let s = handler + ' <http://schema.jillix.net/vocab/emit> ' + event + '.\n' +
+            handler + ' <http://schema.jillix.net/vocab/event> ' + event_ref + ' .\n' +
+            handler + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.jillix.net/vocab/EventEmit> .\n';
 
-    if (nextSeq) {
-        s += seq + ' <http://schema.jillix.net/vocab/sequence> ' + nextSeq + ' .\n';
+    if (next_handler) {
+        s += handler + ' <http://schema.jillix.net/vocab/sequence> ' + next_handler + ' .\n';
     }
 
     return s;
 };
 
-function createDataHandler(instance, seq, nextSeq, root_event) {
-    let s = seq + ' <http://schema.jillix.net/vocab/instance> ' + instance + '.\n' +
-            seq + ' <http://schema.jillix.net/vocab/event> ' + root_event + ' .\n' +
-            seq + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.jillix.net/vocab/DataHandler> .\n' +
-            seq + ' <http://schema.jillix.net/vocab/dataHandler> ' +
+function createDataHandler(instance, handler, next_handler, event_ref) {
+    let s = handler + ' <http://schema.jillix.net/vocab/instance> ' + instance + '.\n' +
+            handler + ' <http://schema.jillix.net/vocab/event> ' + event_ref + ' .\n' +
+            handler + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.jillix.net/vocab/DataHandler> .\n' +
+            handler + ' <http://schema.jillix.net/vocab/dataHandler> ' +
             '<https://raw.githubusercontent.com/adioo/flow-dummy/master/module.json#data> .\n';
 
-    if (nextSeq) {
-        s += seq + ' <http://schema.jillix.net/vocab/sequence> ' + nextSeq + ' .\n';
+    if (next_handler) {
+        s += handler + ' <http://schema.jillix.net/vocab/sequence> ' + next_handler + ' .\n';
     }
 
     return s;
 };
 
-function createStreamHandler(instance, seq, nextSeq, root_event) {
-    let s = seq + ' <http://schema.jillix.net/vocab/instance> ' + instance + '.\n' +
-            seq + ' <http://schema.jillix.net/vocab/event> ' + root_event + ' .\n' +
-            seq + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.jillix.net/vocab/StreamHandler> .\n' +
-            seq + ' <http://schema.jillix.net/vocab/streamHandler> ' +
+function createStreamHandler(instance, handler, next_handler, event_ref) {
+    let s = handler + ' <http://schema.jillix.net/vocab/instance> ' + instance + '.\n' +
+            handler + ' <http://schema.jillix.net/vocab/event> ' + event_ref + ' .\n' +
+            handler + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.jillix.net/vocab/StreamHandler> .\n' +
+            handler + ' <http://schema.jillix.net/vocab/streamHandler> ' +
             '<https://raw.githubusercontent.com/adioo/flow-dummy/master/module.json#stream> .\n';
 
-    if (nextSeq) {
-        s += seq + ' <http://schema.jillix.net/vocab/sequence> ' + nextSeq + ' .\n';
+    if (next_handler) {
+        s += handler + ' <http://schema.jillix.net/vocab/sequence> ' + next_handler + ' .\n';
     }
 
     return s;
