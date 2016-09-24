@@ -3,9 +3,9 @@
 const num_instances = process.argv[2] || 42;
 const instances = [];
 const events = [];
-const dependencies = [];
+const instances_to_connect = {};
 const domain = '<http://doma.in/_i/';
-const iri_end = '> ';
+const iri_end = '>';
 const onEnd = domain + 'INSTANCE/onEnd>';
 const onError = domain + 'INSTANCE/onError>';
 
@@ -22,6 +22,9 @@ let next_handler;
 let handler_type;
 let target;
 let hStep;
+let target_instance;
+let dependency_target;
+let dependency_instance;
 
 // TODO create ids, then the triples
 // TODO select onError and onEnd from cached events
@@ -51,6 +54,8 @@ for (step = 0; num_instances > step; ++step) {
     process.stdout.write(createInstance(instance_iri, instance));
     process.stdout.write(createArguments(instance_iri, '_:' + UID(8)));
 
+    instances_to_connect[instance_iri] = {};
+
     // event
     num_events = random(1, 23);
     for (eStep = 0; num_events > eStep; ++eStep) {
@@ -71,13 +76,9 @@ for (step = 0; num_instances > step; ++step) {
             if (handler_type > 1) {
                 target = events[random(0, events.length - 1)];
 
-                // add target to dependency list
-                let dependencyInstance = '<http://doma.in/_i/' + instance +'>';
-                let dependencyTarget = target.substring(0, target.lastIndexOf('/')) + '>';
-                let dependency = dependencyInstance + ' <http://schema.jillix.net/vocab/dependency> ' + dependencyTarget + ' .\n';
-                if (dependencies.indexOf(dependency) < 0 && dependencyInstance !== dependencyTarget) {
-                    dependencies.push(dependency);
-                    process.stdout.write(dependency);
+                target_instance = target.substring(0, target.lastIndexOf('/')) + '>';
+                if (target_instance !== instance_iri) {
+                    instances_to_connect[instance_iri][target_instance] = 1;
                 }
 
                 process.stdout.write(createEventHandler(target, current_handler, next_handler, event_iri));
@@ -86,13 +87,8 @@ for (step = 0; num_instances > step; ++step) {
             } else {
                 target = instances[random(0, instances.length - 1)];
 
-                // add target to dependency list
-                let dependencyInstance = '<http://doma.in/_i/' + instance +'>';
-                let dependencyTarget = target.trim();
-                let dependency = dependencyInstance + ' <http://schema.jillix.net/vocab/dependency> ' + dependencyTarget + ' .\n';
-                if (dependencies.indexOf(dependency) < 0 && dependencyInstance !== dependencyTarget) {
-                    dependencies.push(dependency);
-                    process.stdout.write(dependency);
+                if (target !== instance_iri) {
+                    instances_to_connect[instance_iri][target] = 1;
                 }
 
                 if (handler_type === 0) {
@@ -107,6 +103,12 @@ for (step = 0; num_instances > step; ++step) {
 
             current_handler = next_handler;
         }
+    }
+}
+
+for (dependency_instance in instances_to_connect) {
+    for (dependency_target in instances_to_connect[dependency_instance]) {
+        process.stdout.write(dependency_instance + ' <http://schema.jillix.net/vocab/dependency> ' + dependency_target + ' .\n');
     }
 }
 
@@ -126,27 +128,27 @@ function random (min, max) {
 
 // create basic instance triples
 function createInstance (iri, name) {
-    let s = iri + '<http://schema.org/name> "\\"' + name + '\\"" .\n' +
-            iri + '<http://schema.jillix.net/vocab/roles> "\\"*\\"" .\n' +
-            iri + '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.jillix.net/vocab/ModuleInstanceConfig> .\n' +
-            iri + '<http://schema.jillix.net/vocab/module> <https://raw.githubusercontent.com/adioo/flow-dummy/master/module.json> .\n';
+    let s = iri + ' <http://schema.org/name> "\\"' + name + '\\"" .\n' +
+            iri + ' <http://schema.jillix.net/vocab/roles> "\\"*\\"" .\n' +
+            iri + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.jillix.net/vocab/ModuleInstanceConfig> .\n' +
+            iri + ' <http://schema.jillix.net/vocab/module> <https://raw.githubusercontent.com/adioo/flow-dummy/master/module.json> .\n';
 
     return s;
 };
 
 function createEvent (inst, iri, name, next_handler) {
-    let s = inst + '<http://schema.jillix.net/vocab/event> ' + iri + '.\n' +
-            iri + '<http://schema.jillix.net/vocab/onError> ' + onError + ' .\n' +
-            iri + '<http://schema.jillix.net/vocab/onEnd> ' + onEnd + ' .\n' +
-            iri + '<http://schema.org/name> "\\"' + name + '\\"" .\n' +
-            iri + '<http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.jillix.net/vocab/FlowEvent> .\n' +
-            iri + '<http://schema.jillix.net/vocab/sequence> ' + next_handler + ' .\n';
+    let s = inst + ' <http://schema.jillix.net/vocab/event> ' + iri + ' .\n' +
+            iri + ' <http://schema.jillix.net/vocab/onError> ' + onError + ' .\n' +
+            iri + ' <http://schema.jillix.net/vocab/onEnd> ' + onEnd + ' .\n' +
+            iri + ' <http://schema.org/name> "\\"' + name + '\\"" .\n' +
+            iri + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.jillix.net/vocab/FlowEvent> .\n' +
+            iri + ' <http://schema.jillix.net/vocab/sequence> ' + next_handler + ' .\n';
 
     return s;
 };
 
 function createEventHandler(event, handler, next_handler, event_ref) {
-    let s = handler + ' <http://schema.jillix.net/vocab/emit> ' + event + '.\n' +
+    let s = handler + ' <http://schema.jillix.net/vocab/emit> ' + event + ' .\n' +
             handler + ' <http://schema.jillix.net/vocab/event> ' + event_ref + ' .\n' +
             handler + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.jillix.net/vocab/EventEmit> .\n';
 
@@ -158,7 +160,7 @@ function createEventHandler(event, handler, next_handler, event_ref) {
 };
 
 function createDataHandler(instance, handler, next_handler, event_ref) {
-    let s = handler + ' <http://schema.jillix.net/vocab/instance> ' + instance + '.\n' +
+    let s = handler + ' <http://schema.jillix.net/vocab/instance> ' + instance + ' .\n' +
             handler + ' <http://schema.jillix.net/vocab/event> ' + event_ref + ' .\n' +
             handler + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.jillix.net/vocab/DataHandler> .\n' +
             handler + ' <http://schema.jillix.net/vocab/dataHandler> ' +
@@ -172,7 +174,7 @@ function createDataHandler(instance, handler, next_handler, event_ref) {
 };
 
 function createStreamHandler(instance, handler, next_handler, event_ref) {
-    let s = handler + ' <http://schema.jillix.net/vocab/instance> ' + instance + '.\n' +
+    let s = handler + ' <http://schema.jillix.net/vocab/instance> ' + instance + ' .\n' +
             handler + ' <http://schema.jillix.net/vocab/event> ' + event_ref + ' .\n' +
             handler + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.jillix.net/vocab/StreamHandler> .\n' +
             handler + ' <http://schema.jillix.net/vocab/streamHandler> ' +
