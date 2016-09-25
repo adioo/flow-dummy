@@ -154,7 +154,7 @@ function createEvent (inst, iri, name, next_handler) {
 function createEventHandler(event, handler, next_handler, event_ref) {
     let s = handler + ' <http://schema.jillix.net/vocab/emit> ' + event + ' .\n' +
             handler + ' <http://schema.jillix.net/vocab/event> ' + event_ref + ' .\n' +
-            handler + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.jillix.net/vocab/EventEmit> .\n';
+            handler + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.jillix.net/vocab/Sequence> .\n';
 
     if (next_handler) {
         s += handler + ' <http://schema.jillix.net/vocab/sequence> ' + next_handler + ' .\n';
@@ -166,7 +166,7 @@ function createEventHandler(event, handler, next_handler, event_ref) {
 function createDataHandler(instance, handler, next_handler, event_ref) {
     let s = handler + ' <http://schema.jillix.net/vocab/instance> ' + instance + ' .\n' +
             handler + ' <http://schema.jillix.net/vocab/event> ' + event_ref + ' .\n' +
-            handler + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.jillix.net/vocab/DataHandler> .\n' +
+            handler + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.jillix.net/vocab/Sequence> .\n' +
             handler + ' <http://schema.jillix.net/vocab/dataHandler> ' +
             '<https://raw.githubusercontent.com/adioo/flow-dummy/master/module.json#data> .\n';
 
@@ -180,7 +180,7 @@ function createDataHandler(instance, handler, next_handler, event_ref) {
 function createStreamHandler(instance, handler, next_handler, event_ref) {
     let s = handler + ' <http://schema.jillix.net/vocab/instance> ' + instance + ' .\n' +
             handler + ' <http://schema.jillix.net/vocab/event> ' + event_ref + ' .\n' +
-            handler + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.jillix.net/vocab/StreamHandler> .\n' +
+            handler + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.jillix.net/vocab/Sequence> .\n' +
             handler + ' <http://schema.jillix.net/vocab/streamHandler> ' +
             '<https://raw.githubusercontent.com/adioo/flow-dummy/master/module.json#stream> .\n';
 
