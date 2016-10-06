@@ -1,13 +1,24 @@
-const PassThrough = require('stream').PassThrough;
+const Transform = require('stream').Transform;
+const util = require('util');
 
-exports.init = (args, ready) => {
+exports.init = function (args, ready) {
+    console.log('Dummy.init:', this._name);
     ready();
+    //ready(new Error('Hello, Error!'));
 };
 
-exports.data = (args, chunk, next) => {
+exports.data = function (args, chunk, next) {
+    console.log('Dummy.data:', args, chunk);
     next(null, chunk);
 };
 
-exports.stream = () => {
-    return new PassThrough();
+exports.stream = function (args, stream) {
+    const self = this;
+    return new Transform({
+        objectMode: args.objectMode !== undefined ? args.objectMode : true,
+        write: (chunk, enc, next) => {
+            console.log('Dummy.stream.data:', self._name, chunk);
+            next(null, chunk);
+        }
+    });
 };
