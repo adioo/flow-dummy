@@ -56,7 +56,7 @@ for (step = 0; settings.instances > step; ++step) {
     instance_iri = domain + instance + iri_end;
     instances.push(instance_iri);
     process.stdout.write(createInstance(instance_iri, instance));
-    process.stdout.write(createArguments(instance_iri, '_:' + UID(8)));
+    process.stdout.write(createArguments(instance_iri));
 
     instances_to_connect[instance_iri] = {};
 
@@ -103,7 +103,7 @@ for (step = 0; settings.instances > step; ++step) {
             }
 
             // generate handler arguments
-            process.stdout.write(createArguments(current_handler, '_:' + UID(8)));
+            process.stdout.write(createArguments(current_handler));
 
             current_handler = next_handler;
         }
@@ -191,9 +191,8 @@ function createStreamHandler(instance, handler, next_handler, event_ref) {
     return s;
 };
 
-function createArguments (subject, args) {
-    let s = subject + ' <http://schema.jillix.net/vocab/args> ' + args + ' .\n' +
-            args + ' <http://schema.org/name> "\\"Name\\"" .\n';
+function createArguments (subject) {
+    let s = subject + ' <http://schema.jillix.net/vocab/args> "\\"{\\"key\\": \\"value\\"}\\"" .\n';
 
     return s;
 };
