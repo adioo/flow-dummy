@@ -10,8 +10,6 @@ const events = [];
 const instances_to_connect = {};
 const domain = '<http://doma.in/_i/';
 const iri_end = '>';
-const onEnd = domain + 'INSTANCE/onEnd>';
-const onError = domain + 'INSTANCE/onError>';
 
 let instance;
 let instance_iri;
@@ -31,7 +29,6 @@ let dependency_target;
 let dependency_instance;
 
 // TODO create ids, then the triples
-// TODO select onError and onEnd from cached events
 
 // module descriptor
 process.stdout.write(
@@ -116,6 +113,19 @@ for (dependency_instance in instances_to_connect) {
     }
 }
 
+events.forEach((event) => {
+    let onEnd = events[random(0, events.length - 1)];
+    let onError = events[random(0, events.length - 1)];
+
+    if (onEnd !== event) {
+        process.stdout.write(event + ' <http://schema.jillix.net/vocab/onEnd> ' + onEnd + ' .\n');
+    }
+
+    if (onError !== event) {
+        process.stdout.write(event + ' <http://schema.jillix.net/vocab/onError> ' + onError + ' .\n');
+    }
+});
+
 function UID (len) {
     len = len || 23;
     for (var i = 0, random = ''; i < len; ++i) {
@@ -142,8 +152,6 @@ function createInstance (iri, name) {
 
 function createEvent (inst, iri, name, next_handler) {
     let s = inst + ' <http://schema.jillix.net/vocab/event> ' + iri + ' .\n' +
-            iri + ' <http://schema.jillix.net/vocab/onError> ' + onError + ' .\n' +
-            iri + ' <http://schema.jillix.net/vocab/onEnd> ' + onEnd + ' .\n' +
             iri + ' <http://schema.org/name> "\\"' + name + '\\"" .\n' +
             iri + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.jillix.net/vocab/FlowEvent> .\n' +
             iri + ' <http://schema.jillix.net/vocab/sequence> ' + next_handler + ' .\n';
