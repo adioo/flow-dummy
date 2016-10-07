@@ -8,7 +8,7 @@ exports.init = function (args, ready) {
 };
 
 exports.data = function (args, chunk, next) {
-    console.log('Dummy.data:', args, chunk);
+    console.log('Dummy.data:', this._name, chunk);
     next(null, chunk);
 };
 
@@ -16,7 +16,7 @@ exports.stream = function (args, stream) {
     const self = this;
     return new Transform({
         objectMode: args.objectMode !== undefined ? args.objectMode : true,
-        write: (chunk, enc, next) => {
+        transform: (chunk, enc, next) => {
             console.log('Dummy.stream.data:', self._name, chunk);
             next(null, chunk);
         }
