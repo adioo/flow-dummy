@@ -10,6 +10,7 @@ exports.init = function (args, ready) {
 exports.data = function (args, chunk, next) {
     console.log('Dummy.data:', this._name, chunk);
     next(null, chunk);
+    //next(new Error('Hello, Error!'));
 };
 
 exports.stream = function (args, stream) {
@@ -19,6 +20,7 @@ exports.stream = function (args, stream) {
         transform: (chunk, enc, next) => {
             console.log('Dummy.stream.data:', self._name, chunk);
             next(null, chunk);
+            //next(new Error('Hello, Error!'));
         }
     });
 };
