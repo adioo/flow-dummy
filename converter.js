@@ -49,8 +49,11 @@ function Convert (instance) {
         );
     }
 
+    //flow
     if (instance.flow) {
-        //flow
+        for (let event in instance.flow) {
+            // event
+        }
     }
 
     //process.exit(1);
