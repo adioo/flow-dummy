@@ -132,7 +132,7 @@ function UID (len) {
         random += '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'[0 | Math.random() * 62];
     }
     return random;
-};
+}
 
 function random (min, max) {
   min = Math.ceil(min);
