@@ -8,14 +8,32 @@ const path = root + 'composition/';
 const npm_pack = require(root + 'package.json');
 const instances = {};
 const files = fs.readdirSync(path);
-const domain = 'https://static.jillix.com/';
+const domain = 'http://doma.in/_i/';//'https://static.jillix.com/';
 const type = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type';
 const dependencies = {};
+
+for (let dep in npm_pack.dependencies) {
+
+    let owner = 'jillix';
+    switch (dep) {
+        case 'flow-view':
+        case 'flow-auth':
+            owner = 'adioo';
+            break;
+    }
+
+    write(
+        '<https://raw.githubusercontent.com/' + owner + '/' + dep  + '/master/module.json>',
+        'http://schema.org/name',
+        '"\\"' + dep + '\\""'
+    );
+}
 
 files.forEach(file => {
     let instance = JSON.parse(fs.readFileSync(path + file));
     instances[instance.name] = instance;
 });
+
 for (let instance in instances) {
     Convert(instances[instance]);
 }
@@ -34,8 +52,11 @@ function getModuleIri (instance, method) {
     let module = instances[instance].module;
     let owner = 'jillix';
 
-    if (module === 'view') {
-        owner = 'adioo';
+    switch (module) {
+        case 'flow-view':
+        case 'flow-auth':
+            owner = 'adioo';
+            break;
     }
 
     if (method) {
