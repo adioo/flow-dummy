@@ -24,6 +24,12 @@ for (let dep in npm_pack.dependencies) {
 
     write(
         '<https://raw.githubusercontent.com/' + owner + '/' + dep  + '/master/module.json>',
+        'http://schema.jillix.net/vocab/gitRepository',
+        '"\\"git+https://github.com/' + owner + '/' + dep + '.git\\""'
+    );
+
+    write(
+        '<https://raw.githubusercontent.com/' + owner + '/' + dep  + '/master/module.json>',
         'http://schema.org/name',
         '"\\"' + dep + '\\""'
     );
