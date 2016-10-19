@@ -1,16 +1,17 @@
 'use strict'
 
 // TODO module descriptors
-
+const suffixTest = /\.json$/;
+const resolve = require('path').resolve;
 const fs = require('fs');
-const root = '/home/adioo/Repos/service/';
+const root = resolve(process.argv[2] || '/home/adioo/Repos') + '/';
 const path = root + 'composition/';
-const npm_pack = require(root + 'package.json');
 const instances = {};
 const files = fs.readdirSync(path);
 const domain = 'http://doma.in/_i/';//'https://static.jillix.com/';
 const type = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type';
 const dependencies = {};
+const npm_pack = require(root + 'package.json');
 
 for (let dep in npm_pack.dependencies) {
 
@@ -36,8 +37,17 @@ for (let dep in npm_pack.dependencies) {
 }
 
 files.forEach(file => {
-    let instance = JSON.parse(fs.readFileSync(path + file));
-    instances[instance.name] = instance;
+
+    if (!suffixTest.test(file)) {
+        return;
+    }
+
+    try {
+        let instance = JSON.parse(fs.readFileSync(path + file));
+        instances[instance.name] = instance;
+    } catch (error) {
+        throw new Error(path + file + '\n' + error);
+    }
 });
 
 for (let instance in instances) {
