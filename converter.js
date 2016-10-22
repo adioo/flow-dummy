@@ -8,12 +8,30 @@ const root = resolve(process.argv[2] || '/home/adioo/Repos') + '/';
 const path = root + 'composition/';
 const instances = {};
 const files = fs.readdirSync(path);
-const domain = 'http://doma.in/_i/';//'https://static.jillix.com/';
+const domain = '';//'https://static.jillix.com/';
 const type = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type';
 const dependencies = {};
-const npm_pack = require(root + 'package.json');
+const modules = [
+    "flow-app",
+    "flow-browser",
+    "flow-http",
+    "flow-pack",
+    "flow-router",
+    "flow-service-api",
+    "flow-tools",
+    "flow-static",
+    "flow-schema",
+    "flow-url",
+    "flow-sendgrid",
+    "flow-auth",
+    "flow-view",
+    "flow-api",
+    "flow-remodal",
+    "builder",
+    "schema"
+];
 
-for (let dep in npm_pack.dependencies) {
+modules.forEach(dep => {
 
     let owner = 'jillix';
     switch (dep) {
@@ -34,7 +52,7 @@ for (let dep in npm_pack.dependencies) {
         'http://schema.org/name',
         '"\\"' + dep + '\\""'
     );
-}
+});
 
 files.forEach(file => {
 
