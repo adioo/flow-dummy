@@ -42,13 +42,13 @@ modules.forEach(dep => {
     }
 
     write(
-        '<https://raw.githubusercontent.com/' + owner + '/' + dep  + '/master/module.json>',
+        '<' + owner + '/' + dep  + '>',
         'http://schema.jillix.net/vocab/gitRepository',
         '"\\"git+https://github.com/' + owner + '/' + dep + '.git\\""'
     );
 
     write(
-        '<https://raw.githubusercontent.com/' + owner + '/' + dep  + '/master/module.json>',
+        '<' + owner + '/' + dep  + '>',
         'http://schema.org/name',
         '"\\"' + dep + '\\""'
     );
@@ -94,9 +94,9 @@ function getModuleIri (instance, method) {
     }
 
     if (method) {
-        return '<https://raw.githubusercontent.com/' + owner + '/' + module + '/master/module.json#' + method + '>';
+        return '<' + owner + '/' + module + '#' + method + '>';
     } else {
-        return '<https://raw.githubusercontent.com/' + owner + '/' + module + '/master/module.json>';
+        return '<' + owner + '/' + module + '>';
     }
 }
 
