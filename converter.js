@@ -8,7 +8,7 @@ const root = resolve(process.argv[2] || '/home/adioo/Repos') + '/';
 const path = root + 'composition/';
 const instances = {};
 const files = fs.readdirSync(path);
-const domain = '';//'https://static.jillix.com/';
+const domain = '';//'https://static.jillix.com/'
 const type = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type';
 const dependencies = {};
 const modules = [
@@ -26,6 +26,7 @@ const modules = [
     "flow-auth",
     "flow-view",
     "flow-api",
+    "flow-visualizer",
     "flow-remodal",
     "builder",
     "schema"
@@ -34,10 +35,15 @@ const modules = [
 modules.forEach(dep => {
 
     let owner = 'jillix';
+    let branch = '#flow_v0.1.0';
     switch (dep) {
         case 'flow-view':
         case 'flow-auth':
             owner = 'adioo';
+            break;
+        case 'flow-visualizer':
+            owner = 'adioo';
+            branch = '';
             break;
     }
 
@@ -50,13 +56,13 @@ modules.forEach(dep => {
     write(
         '<' + owner + '/' + dep  + '>',
         'http://schema.jillix.net/vocab/gitRepository',
-        '"\\"git+https://github.com/' + owner + '/' + dep + '.git\\""'
+        '"git+https://github.com/' + owner + '/' + dep + '.git' + branch + '"'
     );
 
     write(
         '<' + owner + '/' + dep  + '>',
         'http://schema.org/name',
-        '"\\"' + dep + '\\""'
+        '"' + dep + '"'
     );
 });
 
@@ -95,6 +101,7 @@ function getModuleIri (instance, method) {
     switch (module) {
         case 'flow-view':
         case 'flow-auth':
+        case 'flow-visualizer':
             owner = 'adioo';
             break;
     }
@@ -145,7 +152,7 @@ function Convert (instance) {
         write(
             instance_name,
             'http://schema.org/name',
-            '"\\"' + instance.name + '\\""'
+            '"' + instance.name + '"'
         );
     }
 
@@ -170,7 +177,7 @@ function Convert (instance) {
             write(
                 instance_name,
                 'http://schema.jillix.net/vocab/roles',
-                '"\\"' + role + '\\""'
+                '"' + role + '"'
             );
         }
     }
@@ -180,7 +187,7 @@ function Convert (instance) {
         write(
             instance_name,
             'http://schema.jillix.net/vocab/args',
-            '"\\"' + JSON.stringify(instance.config).replace(/"/g, '\\"') + '\\""'
+            '"' + JSON.stringify(instance.config).replace(/"/g, '\\"') + '"'
         );
     }
 
@@ -191,7 +198,7 @@ function Convert (instance) {
             write(
                 event_iri,
                 'http://schema.org/name',
-                '"\\"' + event + '\\""'
+                '"' + event + '"'
             );
 
             write(
@@ -270,7 +277,7 @@ function Convert (instance) {
                         write(
                             handler_id,
                             'http://schema.jillix.net/vocab/args',
-                            '"\\"' + JSON.stringify(args).replace(/"/g, '\\"') + '\\""'
+                            '"' + JSON.stringify(args).replace(/"/g, '\\"') + '"'
                         );
                     }
 
