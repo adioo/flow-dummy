@@ -12,24 +12,24 @@ const domain = '';//'https://static.jillix.com/'
 const type = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type';
 const dependencies = {};
 const modules = [
-    "flow-app",
+    //"flow-app",
     "flow-browser",
     "flow-http",
-    "flow-pack",
+    //"flow-pack",
     "flow-router",
-    "flow-service-api",
+    //"flow-service-api",
     "flow-tools",
     "flow-static",
-    "flow-schema",
-    "flow-url",
-    "flow-sendgrid",
-    "flow-auth",
+    //"flow-schema",
+    //"flow-url",
+    //"flow-sendgrid",
+    //"flow-auth",
     "flow-view",
     "flow-api",
-    "flow-visualizer",
-    "flow-remodal",
-    "builder",
-    "schema"
+    "flow-visualizer"
+    //"flow-remodal",
+    //"builder",
+    //"schema"
 ];
 
 modules.forEach(dep => {
