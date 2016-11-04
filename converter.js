@@ -281,13 +281,11 @@ function Convert (instance) {
                         );
                     }
 
-                    if (path.type !== '>') {
-                        write(
-                            handler_id,
-                            'http://schema.jillix.net/vocab/instance',
-                            '<' + domain + path.instance + '>'
-                        );
-                    }
+                    write(
+                        handler_id,
+                        'http://schema.jillix.net/vocab/instance',
+                        '<' + domain + path.instance + '>'
+                    );
 
                     switch (path.type) {
                         case '.':
