@@ -26,9 +26,9 @@ const modules = [
     //"flow-auth",
     "flow-view",
     "flow-api",
-    "flow-visualizer"
+    "flow-visualizer",
     //"flow-remodal",
-    //"builder",
+    "builder"
     //"schema"
 ];
 
