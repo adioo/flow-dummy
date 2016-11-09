@@ -182,15 +182,6 @@ function Convert (instance) {
         }
     }
 
-    // args
-    if (instance.config) {
-        write(
-            instance_name,
-            'http://schema.jillix.net/vocab/args',
-            '"' + JSON.stringify(instance.config).replace(/"/g, '\\"') + '"'
-        );
-    }
-
     //flow
     if (instance.flow) {
         for (let event in instance.flow) {
