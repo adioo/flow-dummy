@@ -39,11 +39,8 @@ modules.forEach(dep => {
     switch (dep) {
         case 'flow-view':
         case 'flow-auth':
-            owner = 'adioo';
-            break;
         case 'flow-visualizer':
             owner = 'adioo';
-            branch = '';
             break;
     }
 
