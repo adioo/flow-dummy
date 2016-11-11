@@ -35,7 +35,6 @@ const modules = [
 modules.forEach(dep => {
 
     let owner = 'jillix';
-    let branch = '#flow_v0.1.0';
     switch (dep) {
         case 'flow-view':
         case 'flow-auth':
@@ -53,7 +52,7 @@ modules.forEach(dep => {
     write(
         '<' + owner + '/' + dep  + '>',
         'http://schema.jillix.net/vocab/gitRepository',
-        '"git+https://github.com/' + owner + '/' + dep + '.git' + branch + '"'
+        '"git+https://github.com/' + owner + '/' + dep + '.git"'
     );
 
     write(
