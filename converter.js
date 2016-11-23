@@ -15,11 +15,13 @@ const modules = [
     //"flow-app",
     "flow-browser",
     "flow-http",
+    "flow-compress",
     //"flow-pack",
     "flow-router",
     //"flow-service-api",
     "flow-tools",
     "flow-static",
+    "flow-streams",
     //"flow-schema",
     //"flow-url",
     //"flow-sendgrid",
@@ -32,31 +34,40 @@ const modules = [
     //"schema"
 ];
 
-modules.forEach(dep => {
+function getModuleId (name) {
 
     let owner = 'jillix';
-    switch (dep) {
+    switch (name) {
         case 'flow-view':
         case 'flow-auth':
+        case 'flow-streams':
         case 'flow-visualizer':
+        case 'flow-compress':
             owner = 'adioo';
             break;
     }
 
+    return owner + '/' + name;
+}
+
+modules.forEach(dep => {
+
+    let module = getModuleId(dep);
+
     write(
-        '<' + owner + '/' + dep  + '>',
+        '<' + module + '>',
         'http://www.w3.org/1999/02/22-rdf-syntax-ns#type',
         '<http://schema.jillix.net/vocab/Module>'
     );
 
     write(
-        '<' + owner + '/' + dep  + '>',
+        '<' + module  + '>',
         'http://schema.jillix.net/vocab/gitRepository',
-        '"git+https://github.com/' + owner + '/' + dep + '.git"'
+        '"git+https://github.com/' + module + '.git"'
     );
 
     write(
-        '<' + owner + '/' + dep  + '>',
+        '<' + module + '>',
         'http://schema.org/name',
         '"' + dep + '"'
     );
@@ -91,21 +102,12 @@ function write (subject, predicate, object) {
 }
 
 function getModuleIri (instance, method) {
-    let module = instances[instance].module;
-    let owner = 'jillix';
-
-    switch (module) {
-        case 'flow-view':
-        case 'flow-auth':
-        case 'flow-visualizer':
-            owner = 'adioo';
-            break;
-    }
+    let module = getModuleId(instances[instance].module);
 
     if (method) {
-        return '<' + owner + '/' + module + '#' + method + '>';
+        return '<' + module + '#' + method + '>';
     } else {
-        return '<' + owner + '/' + module + '>';
+        return '<' + module + '>';
     }
 }
 
