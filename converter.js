@@ -47,6 +47,10 @@ function getMethodIri (module, method) {
         case 'flow-compress':
             owner = 'adioo';
             break;
+        case 'flow-keypress':
+        case 'flow-ace':
+            owner = 'danandrei';
+            break;
     }
 
     return owner + '/' + module + '?' + method;
