@@ -139,7 +139,7 @@ function Convert (state) {
             write(
                 sequence_id,
                 'http://schema.jillix.net/vocab/onEnd',
-                '_:' + state.flow[sequence].e
+                state.flow[sequence].e
             );
         }
 
@@ -148,7 +148,7 @@ function Convert (state) {
             write(
                 sequence_id,
                 'http://schema.jillix.net/vocab/onError',
-                '_:' + state.flow[sequence].r
+                state.flow[sequence].r
             );
         }
 
