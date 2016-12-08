@@ -1,6 +1,6 @@
 'use strict'
 
-// TODO module descriptors
+const crypto = require('crypto');
 const resolve = require('path').resolve;
 const fs = require('fs');
 const suffixTest = /\.json$/;
@@ -74,7 +74,8 @@ function extendInstance (state, path) {
     if (parsed.type !== '>') {
         parsed.path = getMethodIri(states[parsed.state].module, parsed.path);
     } else {
-        parsed.path = '_:' + parsed.state + '/' + parsed.path;
+        //parsed.path = '_:' + crypto.createHash('md5').update(parsed.state + '/' + parsed.path).digest('hex');
+        parsed.path = parsed.state + '/' + parsed.path;
     }
 
     return parsed;
@@ -94,7 +95,9 @@ function Convert (state) {
     }
 
     for (let sequence in state.flow) {
-        let sequence_id = '_:' + UID(8);
+        //let sequence_id = '_:' + crypto.createHash('md5').update(state.name + '/' + sequence).digest('hex');
+        let sequence_id = '_:' + state.name + '/' + sequence;
+
         write(
             sequence_id,
             'http://schema.org/name',
@@ -199,7 +202,7 @@ function Convert (state) {
                 write(
                     handler_id,
                     'http://schema.jillix.net/vocab/state',
-                    '"' + state.name + '"'
+                    '"' + path.state + '"'
                 );
 
                 switch (path.type) {
