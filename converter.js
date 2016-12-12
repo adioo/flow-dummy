@@ -255,9 +255,9 @@ for (let name in states) {
 
                 // link back to sequence (owner)
                 write(
-                    handler_id,
-                    'http://schema.jillix.net/vocab/sequence',
-                    sequence_id
+                    sequence_id,
+                    'http://schema.jillix.net/vocab/handler',
+                    handler_id
                 );
             });
         }
