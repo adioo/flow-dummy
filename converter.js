@@ -182,6 +182,20 @@ for (let name in states) {
                 // method args
                 if (args) {
                     args = JSON.stringify(args);
+
+                    // potential emits from args
+                    let potential_emits = args.match(/\{FLOW\:([^\}]+)\}/g);
+                    let emits = [];
+                    if (potential_emits) {
+                        potential_emits.forEach(emit => {
+                            let replace = emit;
+                            emit = emit.slice(6, -1).replace('/', '');
+                            emit = '_:' + crypto.createHash('md5').update(emit).digest('hex');
+                            args = args.replace(replace, emit);
+                            emits.push(emit); 
+                        });
+                    }
+
                     let args_id = getHash(args);
                     write(
                         handler_id,
@@ -189,23 +203,17 @@ for (let name in states) {
                         args_id
                     );
 
-                    // potential emits from args
-                    let potential_emits = args.match(/\{FLOW\:([^\}]+)\}/g);
-                    if (potential_emits) {
-                        potential_emits.forEach(emit => {
-                            emit = emit.slice(6, -1).replace('/', '');
-                            emit = '_:' + crypto.createHash('md5').update(emit).digest('hex');
-                            let triple = args_id + 'emit' + emit;
-                            if (!temp_index[triple]) {
-                                temp_index[triple] = 1;
-                                write(
-                                    args_id,
-                                    'http://schema.jillix.net/vocab/emit',
-                                    emit
-                                );
-                            }
-                        });
-                    }
+                    emits.forEach(emit => {
+                        let key = args_id + emit;
+                        if (!temp_index[key]) {
+                            temp_index[key] = 1;
+                            write(
+                                args_id,
+                                'http://schema.jillix.net/vocab/emit',
+                                emit
+                            );
+                        }
+                    });
                 }
 
                 // state
