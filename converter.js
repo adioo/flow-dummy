@@ -83,13 +83,13 @@ function getHash (string) {
 }
 
 // create network triple
-const network_id = '_:' + UID(8);
+const network_id = '_:' + crypto.createHash('md5').update(env_config.network).digest('hex');
 
 // network name (Service)
 write(
     network_id,
     'http://schema.org/name',
-    getHash('Service')
+    getHash(env_config.network)
 );
 
 // network type
@@ -131,7 +131,7 @@ if (env_config) {
             // network entrypoint
             write(
                 network_id,
-                'http://schema.jillix.net/vocab/role',
+                'http://schema.jillix.net/vocab/entrypoint',
                 entrypoint_id
             );
 
