@@ -5,12 +5,13 @@ const resolve = require('path').resolve;
 const fs = require('fs');
 const suffixTest = /\.json$/;
 const root = resolve(process.argv[2] || '.') + '/';
+const env_config = require(root + 'flow.json');
 const path = root + 'composition/';
 const states = {};
 const files = fs.readdirSync(path);
 const rdf_syntax = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#';
 const hashids = {};
-const entrypoints = {};
+const envs = {};
 const temp_index = {};
 
 function write (subject, predicate, object) {
@@ -81,6 +82,23 @@ function getHash (string) {
     return hash;
 }
 
+// create network triple
+const network_id = '_:' + UID(8);
+
+// network name (Service)
+write(
+    network_id,
+    'http://schema.org/name',
+    getHash('Service')
+);
+
+// network type
+write(
+    network_id,
+    rdf_syntax + 'type',
+    '<http://schema.jillix.net/vocab/Network>'
+);
+
 // Convert composition files to triples
 files.forEach(file => {
 
@@ -95,6 +113,64 @@ files.forEach(file => {
         throw new Error(path + file + '\n' + error);
     }
 });
+
+// create env objects
+if (env_config) {
+
+    if (env_config.environments) {
+        env_config.environments.forEach(env => {
+            envs[env.name] = getHash(JSON.stringify(env.vars));
+        });
+    }
+
+    if (env_config.entrypoints) {
+        env_config.entrypoints.forEach(ep => {
+
+            const entrypoint_id = '_:' + UID(8);
+
+            // network entrypoint
+            write(
+                network_id,
+                'http://schema.jillix.net/vocab/role',
+                entrypoint_id
+            );
+
+            // entrypoint name
+            write(
+                entrypoint_id,
+                'http://schema.org/name',
+                getHash(ep.name)
+            );
+
+            // entrypoint type
+            write(
+                entrypoint_id,
+                rdf_syntax + 'type',
+                '<http://schema.jillix.net/vocab/Entrypoint>'
+            );
+
+            // entrypoint environment
+            if (ep.env) {
+                ep.env.forEach(env => {
+                    if (envs[env]) {
+                        write(
+                            entrypoint_id,
+                            'http://schema.jillix.net/vocab/environment',
+                            envs[env]
+                        );
+                    }
+                });
+            }
+
+            // entrypoint sequence
+            write(
+                entrypoint_id,
+                'http://schema.jillix.net/vocab/sequence',
+                ep.emit
+            );
+        });
+    }
+}
 
 for (let name in states) {
     let state = states[name];
@@ -147,11 +223,6 @@ for (let name in states) {
                 'http://schema.jillix.net/vocab/onError',
                 '_:' + crypto.createHash('md5').update(state.flow[sequence].r).digest('hex')
             );
-        }
-
-        // TODO env vars
-        if (entrypoints[sequence]) {
-            // ..
         }
 
         // sequence
