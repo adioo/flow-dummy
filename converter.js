@@ -166,7 +166,7 @@ if (env_config) {
             write(
                 entrypoint_id,
                 'http://schema.jillix.net/vocab/sequence',
-                ep.emit
+                '_:' + crypto.createHash('md5').update(ep.emit.replace('/', '')).digest('hex')
             );
         });
     }
