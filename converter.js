@@ -119,7 +119,28 @@ if (env_config) {
 
     if (env_config.environments) {
         env_config.environments.forEach(env => {
-            envs[env.name] = getHash(JSON.stringify(env.vars));
+            envs[env.name] = getHash(env.name);
+
+            // environment name
+            write(
+                envs[env.name],
+                'http://schema.org/name',
+                envs[env.name]
+            );
+
+            // environment vars
+            write(
+                envs[env.name],
+                'http://schema.jillix.net/vocab/vars',
+                getHash(JSON.stringify(env.vars))
+            );
+
+            // environment type
+            write(
+                envs[env.name],
+                rdf_syntax + 'type',
+                '<http://schema.jillix.net/vocab/Environment>'
+            );
         });
     }
 
