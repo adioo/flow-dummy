@@ -56,6 +56,9 @@ function parseHandler (state, handler) {
         parsed.path = handler[0]
     }
 
+    parsed.name = parsed.state.toLowerCase() + '/' + parsed.path.toUpperCase();
+    parsed.name = parsed.name.trim().replace(/[^a-z0-9\.\/ ]/gi, ' ');
+
     if (parsed.type !== '>') {
         parsed.path = getMethodIri(states[parsed.state].module, parsed.path);
     } else {
@@ -196,6 +199,7 @@ if (env_config) {
     }
 }
 
+// sequences
 for (let name in states) {
     let state = states[name];
 
@@ -203,6 +207,7 @@ for (let name in states) {
         continue;
     }
 
+    // sequence
     for (let sequence in state.flow) {
         let sequence_id = '_:' + crypto.createHash('md5').update(state.name + sequence).digest('hex');
 
@@ -249,9 +254,11 @@ for (let name in states) {
             );
         }
 
-        // sequence
+        // handlers
         if (state.flow[sequence].d) {
             let previous;
+
+            // handler
             state.flow[sequence].d.forEach((handler, index) => {
 
                 let handler_id = UID();
@@ -265,13 +272,87 @@ for (let name in states) {
                     handler = handler[0];
                 }
 
-                handler = parseHandler(state.name, handler); 
+                handler = parseHandler(state.name, handler);
 
-                // type
+                // name
                 write(
                     handler_id,
-                    rdf_syntax + 'type',
-                    '<http://schema.jillix.net/vocab/Handler>'
+                    'http://schema.org/name',
+                    getHash(handler.name) 
+                );
+
+                // state
+                write(
+                    handler_id,
+                    'http://schema.jillix.net/vocab/state',
+                    getHash(handler.state) 
+                );
+
+                switch (handler.type) {
+                    case '.':
+                    case ':':
+                        // type data
+                        write(
+                            handler_id,
+                            rdf_syntax + 'type',
+                            '<http://schema.jillix.net/vocab/Data>'
+                        );
+
+                        // function
+                        write(
+                            handler_id,
+                            'http://schema.jillix.net/vocab/fn',
+                            handler.path
+                        );
+                        break;
+                    case '*':
+                        // type stream
+                        write(
+                            handler_id,
+                            rdf_syntax + 'type',
+                            '<http://schema.jillix.net/vocab/Stream>'
+                        );
+
+                        // function
+                        write(
+                            handler_id,
+                            'http://schema.jillix.net/vocab/fn',
+                            handler.path
+                        );
+                        break;
+
+                    case '>':
+
+                        // type Emit
+                        write(
+                            handler_id,
+                            rdf_syntax + 'type',
+                            '<http://schema.jillix.net/vocab/Emit>'
+                        );
+
+                        // sequence
+                        write(
+                            handler_id,
+                            'http://schema.jillix.net/vocab/sequence',
+                            handler.path
+                        );
+                        break;
+                }
+
+                // next
+                write(
+                    index === 0 ? sequence_id : previous,
+                    'http://schema.jillix.net/vocab/next',
+                    handler_id
+                );
+
+                previous = handler_id;
+
+                // link back to sequence (owner)
+                write(
+                    sequence_id,
+                    'http://schema.jillix.net/vocab/handler',
+                    handler_id
                 );
 
                 // method args
@@ -329,64 +410,12 @@ for (let name in states) {
                             temp_index[key] = 1;
                             write(
                                 args_uid,
-                                'http://schema.jillix.net/vocab/emit',
+                                'http://schema.jillix.net/vocab/sequence',
                                 emit
                             );
                         }
                     });
                 }
-
-                // state
-                write(
-                    handler_id,
-                    'http://schema.jillix.net/vocab/state',
-                    getHash(handler.state, [handler.state])
-                );
-
-                switch (handler.type) {
-                    case '.':
-                    case ':':
-                        // method (data)
-                        write(
-                            handler_id,
-                            'http://schema.jillix.net/vocab/data',
-                            handler.path
-                        );
-                        break;
-                    case '*':
-                        // method (stream)
-                        write(
-                            handler_id,
-                            'http://schema.jillix.net/vocab/stream',
-                            handler.path
-                        );
-                        break;
-
-                    case '>':
-                        // emit
-                        write(
-                            handler_id,
-                            'http://schema.jillix.net/vocab/emit',
-                            handler.path
-                        );
-                        break;
-                }
-
-                // next
-                write(
-                    index === 0 ? sequence_id : previous,
-                    'http://schema.jillix.net/vocab/next',
-                    handler_id
-                );
-
-                previous = handler_id;
-
-                // link back to sequence (owner)
-                write(
-                    sequence_id,
-                    'http://schema.jillix.net/vocab/handler',
-                    handler_id
-                );
             });
         }
     }
