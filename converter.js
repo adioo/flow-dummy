@@ -29,6 +29,7 @@ function getMethodIri (module, method) {
         case 'flow-streams':
         case 'flow-visualizer':
         case 'flow-compress':
+        case 'flow-dummy':
             owner = 'adioo';
             break;
         case 'flow-keypress':
