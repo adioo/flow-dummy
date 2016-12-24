@@ -1,14 +1,8 @@
 const Transform = require('stream').Transform;
 const util = require('util');
 
-exports.init = function (args, ready) {
-    console.log('Dummy.init:', this._name);
-    ready();
-    //ready(new Error('Hello, Error!'));
-};
-
-exports.data = function (args, chunk, next) {
-    console.log('Dummy.data:', this._name, chunk);
+exports.data = function (scope, state, args, chunk, next) {
+    //console.log('Dummy.data:', this._name, chunk);
     next(null, chunk);
     //next(new Error('Hello, Error!'));
 };
