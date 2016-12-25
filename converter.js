@@ -6,7 +6,8 @@ const fs = require('fs');
 const suffixTest = /\.json$/;
 const root = resolve(process.argv[2] || '.') + '/';
 const env_config = require(root + 'flow.json');
-const path = root + 'composition/';
+//const path = root + 'composition/';
+const path = root + 'network/';
 const states = {};
 const files = fs.readdirSync(path);
 const rdf_syntax = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#';
@@ -14,6 +15,7 @@ const hashids = {};
 const hashlbs = {};
 const envs = {};
 const temp_index = {};
+const args_names = {};
 
 function write (subject, predicate, object) {
     process.stdout.write(subject + ' <' + predicate + '> ' + object + ' .\n');
@@ -39,7 +41,8 @@ function getMethodIri (module, method) {
     }
 
     // TODO method descriptor
-    return '<' + owner + '/' + module + '?' + method + '>';
+    //return '<' + owner + '/' + module + '?' + method + '>';
+    return [owner, module, method];
 }
 
 function parseHandler (state, handler) {
@@ -63,7 +66,8 @@ function parseHandler (state, handler) {
     if (parsed.type !== '>') {
         parsed.path = getMethodIri(states[parsed.state].module, parsed.path);
     } else {
-        parsed.path = '_:' + crypto.createHash('md5').update(parsed.state + parsed.path).digest('hex');
+        //parsed.path = '_:' + crypto.createHash('md5').update(parsed.state + parsed.path).digest('hex');
+        parsed.path = parsed.state + '/' + parsed.path;
     }
 
     return parsed;
@@ -79,11 +83,15 @@ function UID (len) {
 }
 
 
-function getHash (string) {
+function getHash (string, name) {
     let hash = '_:' + crypto.createHash('md5').update(string).digest('hex');
     if (!hashids[hash]) {
         hashids[hash] = 1;
         write(hash, rdf_syntax + 'string', '"' + string.replace(/"/g, '\\"') + '"');
+
+        if (name) {
+            write(hash, 'http://schema.org/name', getHash(name));
+        }
     }
 
     return hash;
@@ -113,12 +121,15 @@ files.forEach(file => {
         return;
     }
 
+    let state;
     try {
-        let state = JSON.parse(fs.readFileSync(path + file));
-        states[state.name] = state;
+        state = JSON.parse(fs.readFileSync(path + file));
     } catch (error) {
         throw new Error(path + file + '\n' + error);
     }
+
+    //states[state.name] = state; 
+    states[file] = state; 
 });
 
 // create env objects
@@ -126,28 +137,7 @@ if (env_config) {
 
     if (env_config.environments) {
         env_config.environments.forEach(env => {
-            envs[env.name] = getHash(env.name);
-
-            // environment name
-            write(
-                envs[env.name],
-                'http://schema.org/name',
-                envs[env.name]
-            );
-
-            // environment vars
-            write(
-                envs[env.name],
-                'http://schema.jillix.net/vocab/json',
-                getHash(JSON.stringify(env.vars))
-            );
-
-            // environment type
-            write(
-                envs[env.name],
-                rdf_syntax + 'type',
-                '<http://schema.jillix.net/vocab/Environment>'
-            );
+            envs[env.name] = getHash(JSON.stringify(env.vars), env.name);
         });
     }
 
@@ -194,7 +184,7 @@ if (env_config) {
             write(
                 entrypoint_id,
                 'http://schema.jillix.net/vocab/sequence',
-                '_:' + crypto.createHash('md5').update(ep.emit.replace('/', '')).digest('hex')
+                '_:' + crypto.createHash('md5').update(ep.emit).digest('hex')
             );
         });
     }
@@ -202,21 +192,66 @@ if (env_config) {
 
 // sequences
 for (let name in states) {
-    let state = states[name];
 
-    if (!state.flow) {
-        continue;
+    /*const result = {};
+    const state = states[name];
+    for (let seq in state.flow) {
+        let data = state.flow[seq].d;
+        let error = state.flow[seq].r;
+        let sequence = state.name + '/' + seq;
+
+        // add sequence to the result
+        if (result[sequence]) {
+            throw new Error('Converter: Redundant sequence name: ' + sequence);
+        }
+        result[sequence] = [[]];
+        if (error) {
+            result[sequence][1] = error;
+        }
+
+        let fn, _handler;
+        data.forEach((handler) => {
+            let args;
+            if (typeof handler === 'string') {
+                fn = parseHandler(state.name, handler);
+            } else {
+                fn = parseHandler(state.name, handler[0]);
+                args = handler[1];
+            }
+
+            // handler
+            if (fn.type !== '>') {
+                _handler = [fn.path[0], fn.path[1], fn.path[2], fn.state];
+
+                if (args) {
+                    _handler.push(args);
+                }
+
+            // emits
+            } else {
+                _handler = fn.path;
+            }
+
+            result[sequence][0].push(_handler);
+        });
+        
     }
 
+    fs.writeFile(root + 'network/' + name + '.json', JSON.stringify(result, null, '    '), (err) => {
+        if (err) throw err;
+    });
+    continue;*/
+
     // sequence
-    for (let sequence in state.flow) {
-        let sequence_id = '_:' + crypto.createHash('md5').update(state.name + sequence).digest('hex');
+    for (let sequence in states[name]) {
+        let seq = states[name][sequence];
+        let sequence_id = '_:' + crypto.createHash('md5').update(sequence).digest('hex');
 
         // name
         write(
             sequence_id,
             'http://schema.org/name',
-            getHash(state.name + '-' + sequence)
+            getHash(sequence)
         ); 
 
         // type
@@ -227,197 +262,142 @@ for (let name in states) {
         );
 
         // roles
-        if (state.roles) {
-            for (let role in state.roles) {
-                write(
-                    sequence_id,
-                    'http://schema.jillix.net/vocab/role',
-                    getHash(role)
-                );
-            }
-        }
+        write(
+            sequence_id,
+            'http://schema.jillix.net/vocab/role',
+            getHash('*')
+        );
 
         // end event
-        if (state.flow[sequence].e) {
+        if (seq[2]) {
             write(
                 sequence_id,
                 'http://schema.jillix.net/vocab/onEnd',
-                '_:' + crypto.createHash('md5').update(state.flow[sequence].e.replace('/', '')).digest('hex')
+                '_:' + crypto.createHash('md5').update(seq[2]).digest('hex')
             );
         }
 
         // error event
-        if (state.flow[sequence].r) {
+        if (seq[1]) {
             write(
                 sequence_id,
                 'http://schema.jillix.net/vocab/onError',
-                '_:' + crypto.createHash('md5').update(state.flow[sequence].r.replace('/', '')).digest('hex')
+                '_:' + crypto.createHash('md5').update(seq[1]).digest('hex')
             );
         }
 
         // handlers
-        if (state.flow[sequence].d) {
-            let previous;
+        let previous;
 
-            // handler
-            state.flow[sequence].d.forEach((handler, index) => {
+        // handler
+        seq[0].forEach((handler, index) => {
 
-                let handler_id = UID();
-                let args;
+            let handler_id = UID();
+            let handler_name = typeof handler === 'string' ? handler : handler[1] + '/' + handler[2];
 
-                if (typeof handler === 'string') {
-                    handler = handler;
-                    args = null;
-                } else {
-                    args = handler[1];
-                    handler = handler[0];
-                }
+            // name
+            write(
+                handler_id,
+                'http://schema.org/name',
+                getHash(handler_name) 
+            );
 
-                handler = parseHandler(state.name, handler);
+            // sequence emit
+            if (typeof handler === 'string') {
 
-                // name
+                // type Emit
                 write(
                     handler_id,
-                    'http://schema.org/name',
-                    getHash(handler.name) 
+                    rdf_syntax + 'type',
+                    '<http://schema.jillix.net/vocab/Emit>'
                 );
+
+                // sequence
+                write(
+                    handler_id,
+                    'http://schema.jillix.net/vocab/sequence',
+                    '_:' + crypto.createHash('md5').update(handler).digest('hex')
+                );
+
+            // data handler
+            } else {
 
                 // state
                 write(
                     handler_id,
                     'http://schema.jillix.net/vocab/state',
-                    getHash(handler.state) 
+                    getHash(handler[3]) 
                 );
 
-                switch (handler.type) {
-                    case '.':
-                    case ':':
-                        // type data
-                        write(
-                            handler_id,
-                            rdf_syntax + 'type',
-                            '<http://schema.jillix.net/vocab/Data>'
-                        );
-
-                        // function
-                        write(
-                            handler_id,
-                            'http://schema.jillix.net/vocab/fn',
-                            handler.path
-                        );
-                        break;
-                    case '*':
-                        // type stream
-                        write(
-                            handler_id,
-                            rdf_syntax + 'type',
-                            '<http://schema.jillix.net/vocab/Stream>'
-                        );
-
-                        // function
-                        write(
-                            handler_id,
-                            'http://schema.jillix.net/vocab/fn',
-                            handler.path
-                        );
-                        break;
-
-                    case '>':
-
-                        // type Emit
-                        write(
-                            handler_id,
-                            rdf_syntax + 'type',
-                            '<http://schema.jillix.net/vocab/Emit>'
-                        );
-
-                        // sequence
-                        write(
-                            handler_id,
-                            'http://schema.jillix.net/vocab/sequence',
-                            handler.path
-                        );
-                        break;
-                }
-
-                // next
+                // type data
                 write(
-                    index === 0 ? sequence_id : previous,
-                    'http://schema.jillix.net/vocab/next',
-                    handler_id
+                    handler_id,
+                    rdf_syntax + 'type',
+                    '<http://schema.jillix.net/vocab/Data>'
                 );
 
-                previous = handler_id;
-
-                // link back to sequence (owner)
+                // function
                 write(
-                    sequence_id,
-                    'http://schema.jillix.net/vocab/handler',
-                    handler_id
+                    handler_id,
+                    'http://schema.jillix.net/vocab/fn',
+                    '<' + handler[0] + '/' + handler[1] + '?' + handler[2] + '>'
                 );
+            }
+            
+            // next
+            write(
+                index === 0 ? sequence_id : previous,
+                'http://schema.jillix.net/vocab/next',
+                handler_id
+            );
 
-                // method args
-                if (args) {
-                    args = JSON.stringify(args);
+            previous = handler_id;
 
-                    // potential emits from args
-                    let potential_emits = args.match(/\{FLOW\:([^\}]+)\}/g);
-                    let emits = [];
-                    if (potential_emits) {
-                        potential_emits.forEach(emit => {
-                            let replace = emit;
-                            emit = emit.slice(6, -1).replace('/', '');
-                            emit = '_:' + crypto.createHash('md5').update(emit).digest('hex');
-                            args = args.replace(replace, emit);
-                            emits.push(emit); 
-                        });
-                    }
+            // link back to sequence (owner)
+            write(
+                sequence_id,
+                'http://schema.jillix.net/vocab/handler',
+                handler_id
+            );
 
-                    let args_hid = getHash(args);
-                    let args_uid = UID();
-                    let args_lbl = "Args";
+            // method args
+            if (handler[4]) {
+                let args = JSON.stringify(handler[4]);
 
-                    // handler args connection
-                    write(
-                        handler_id,
-                        'http://schema.jillix.net/vocab/args',
-                        args_uid
-                    );
-
-                    // arg object
-                    write(
-                        args_uid,
-                        'http://schema.jillix.net/vocab/json',
-                        args_hid
-                    );
-
-                    // args type
-                    write(
-                        args_uid,
-                        rdf_syntax + 'type',
-                        '<http://schema.jillix.net/vocab/Arguments>'
-                    );
-
-                    // args name
-                    write(
-                        args_uid,
-                        'http://schema.org/name',
-                        getHash('Args')
-                    );
-
-                    emits.forEach(emit => {
-                        let key = args_uid + emit;
-                        if (!temp_index[key]) {
-                            temp_index[key] = 1;
-                            write(
-                                args_uid,
-                                'http://schema.jillix.net/vocab/sequence',
-                                emit
-                            );
-                        }
+                // potential emits from args
+                let potential_emits = args.match(/\{FLOW\:([^\}]+)\}/g);
+                let emits = [];
+                if (potential_emits) {
+                    potential_emits.forEach(emit => {
+                        let replace = emit;
+                        emit = emit.slice(6, -1);
+                        emit = '_:' + crypto.createHash('md5').update(emit).digest('hex');
+                        args = args.replace(replace, emit);
+                        emits.push(emit); 
                     });
                 }
-            });
-        }
+
+                let args_hid = getHash(args, "Args:" + handler[2]);
+
+                // handler args connection
+                write(
+                    handler_id,
+                    'http://schema.jillix.net/vocab/args',
+                    args_hid
+                );
+
+                emits.forEach(emit => {
+                    let key = args_hid + emit;
+                    if (!temp_index[key]) {
+                        temp_index[key] = 1;
+                        write(
+                            args_hid,
+                            'http://schema.jillix.net/vocab/sequence',
+                            emit
+                        );
+                    }
+                });
+            }
+        });
     }
 }
