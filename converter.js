@@ -15,12 +15,12 @@ const hashids = {};
 const hashlbs = {};
 const envs = {};
 const temp_index = {};
-const args_names = {};
 
 function write (subject, predicate, object) {
     process.stdout.write(subject + ' <' + predicate + '> ' + object + ' .\n');
 }
 
+/*
 function getMethodIri (module, method) {
 
     // git+https://github.com/ + module + .git
@@ -72,6 +72,7 @@ function parseHandler (state, handler) {
 
     return parsed;
 }
+*/
 
 function UID (len) {
     len = len || 23;
