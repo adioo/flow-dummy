@@ -6,7 +6,6 @@ const fs = require('fs');
 const suffixTest = /\.json$/;
 const root = resolve(process.argv[2] || '.') + '/';
 const env_config = require(root + 'flow.json');
-//const path = root + 'composition/';
 const path = root + 'network/';
 const states = {};
 const files = fs.readdirSync(path);
@@ -20,60 +19,6 @@ function write (subject, predicate, object) {
     process.stdout.write(subject + ' <' + predicate + '> ' + object + ' .\n');
 }
 
-/*
-function getMethodIri (module, method) {
-
-    // git+https://github.com/ + module + .git
-    let owner = 'jillix';
-    switch (module) {
-        case 'flow-view':
-        case 'flow-auth':
-        case 'flow-streams':
-        case 'flow-visualizer':
-        case 'flow-compress':
-        case 'flow-dummy':
-            owner = 'adioo';
-            break;
-        case 'flow-keypress':
-        case 'flow-ace':
-            owner = 'danandrei';
-            break;
-    }
-
-    // TODO method descriptor
-    //return '<' + owner + '/' + module + '?' + method + '>';
-    return [owner, module, method];
-}
-
-function parseHandler (state, handler) {
-    handler = handler.split('/');
-    let parsed = {
-        type: handler[0][0]
-    };
-    handler[0] = handler[0].substr(1);
-
-    if (handler.length > 1) {
-        parsed.state = handler[0];
-        parsed.path = handler[1];
-    } else {
-        parsed.state = state;
-        parsed.path = handler[0]
-    }
-
-    parsed.name = parsed.state.toLowerCase() + '/' + parsed.path.toUpperCase();
-    parsed.name = parsed.name.trim().replace(/[^a-z0-9\.\/ ]/gi, ' ');
-
-    if (parsed.type !== '>') {
-        parsed.path = getMethodIri(states[parsed.state].module, parsed.path);
-    } else {
-        //parsed.path = '_:' + crypto.createHash('md5').update(parsed.state + parsed.path).digest('hex');
-        parsed.path = parsed.state + '/' + parsed.path;
-    }
-
-    return parsed;
-}
-*/
-
 function UID (len) {
     len = len || 23;
     let i = 0, random = '';
@@ -82,7 +27,6 @@ function UID (len) {
     }
     return '_:' + crypto.createHash('md5').update(random).digest('hex');
 }
-
 
 function getHash (string, name) {
     let hash = '_:' + crypto.createHash('md5').update(string).digest('hex');
@@ -193,55 +137,6 @@ if (env_config) {
 
 // sequences
 for (let name in states) {
-
-    /*const result = {};
-    const state = states[name];
-    for (let seq in state.flow) {
-        let data = state.flow[seq].d;
-        let error = state.flow[seq].r;
-        let sequence = state.name + '/' + seq;
-
-        // add sequence to the result
-        if (result[sequence]) {
-            throw new Error('Converter: Redundant sequence name: ' + sequence);
-        }
-        result[sequence] = [[]];
-        if (error) {
-            result[sequence][1] = error;
-        }
-
-        let fn, _handler;
-        data.forEach((handler) => {
-            let args;
-            if (typeof handler === 'string') {
-                fn = parseHandler(state.name, handler);
-            } else {
-                fn = parseHandler(state.name, handler[0]);
-                args = handler[1];
-            }
-
-            // handler
-            if (fn.type !== '>') {
-                _handler = [fn.path[0], fn.path[1], fn.path[2], fn.state];
-
-                if (args) {
-                    _handler.push(args);
-                }
-
-            // emits
-            } else {
-                _handler = fn.path;
-            }
-
-            result[sequence][0].push(_handler);
-        });
-        
-    }
-
-    fs.writeFile(root + 'network/' + name + '.json', JSON.stringify(result, null, '    '), (err) => {
-        if (err) throw err;
-    });
-    continue;*/
 
     // sequence
     for (let sequence in states[name]) {
