@@ -28,11 +28,12 @@ function UID (len) {
     return '_:' + crypto.createHash('md5').update(random).digest('hex');
 }
 
-function getHash (string, name) {
+function getHash (string, name, type) {
     let hash = '_:' + crypto.createHash('md5').update(string).digest('hex');
     if (!hashids[hash]) {
         hashids[hash] = 1;
         write(hash, rdf_syntax + 'string', '"' + string.replace(/"/g, '\\"') + '"');
+        write(hash, rdf_syntax + 'type', '<http://schema.jillix.net/vocab/' + (type || 'Name') + '>');
 
         if (name) {
             write(hash, 'http://schema.org/name', getHash(name));
@@ -43,7 +44,7 @@ function getHash (string, name) {
 }
 
 // create network triple
-const network_id = '_:' + crypto.createHash('md5').update(env_config.network).digest('hex');
+const network_id = UID();
 
 // network name (Service)
 write(
@@ -82,7 +83,7 @@ if (env_config) {
 
     if (env_config.environments) {
         env_config.environments.forEach(env => {
-            envs[env.name] = getHash(JSON.stringify(env.vars), env.name);
+            envs[env.name] = getHash(JSON.stringify(env.vars), env.name, 'Environment');
         });
     }
 
@@ -147,7 +148,7 @@ for (let name in states) {
         write(
             sequence_id,
             'http://schema.org/name',
-            getHash(sequence)
+            getHash(sequence.toUpperCase())
         ); 
 
         // type
@@ -161,7 +162,7 @@ for (let name in states) {
         write(
             sequence_id,
             'http://schema.jillix.net/vocab/role',
-            getHash('*')
+            getHash('*', null, 'Role')
         );
 
         // end event
@@ -189,7 +190,7 @@ for (let name in states) {
         seq[0].forEach((handler, index) => {
 
             let handler_id = UID();
-            let handler_name = typeof handler === 'string' ? handler : handler[1] + '/' + handler[2];
+            let handler_name = typeof handler === 'string' ? 'Emit:' + handler : handler[1] + '/' + handler[2];
 
             // name
             write(
@@ -222,7 +223,7 @@ for (let name in states) {
                 write(
                     handler_id,
                     'http://schema.jillix.net/vocab/state',
-                    getHash(handler[3]) 
+                    getHash(handler[3], null, 'State') 
                 );
 
                 // type data
@@ -257,7 +258,7 @@ for (let name in states) {
             );
 
             // method args
-            if (handler[4]) {
+            if (typeof handler !== 'string' && handler[4]) {
                 let args = JSON.stringify(handler[4]);
 
                 // potential emits from args
@@ -273,7 +274,7 @@ for (let name in states) {
                     });
                 }
 
-                let args_hid = getHash(args, "Args:" + handler[2]);
+                let args_hid = getHash(args, "Args:" + handler[2], 'Args');
 
                 // handler args connection
                 write(
