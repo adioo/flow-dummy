@@ -13,6 +13,7 @@ const rdf_syntax = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#';
 const hashids = {};
 const hashlbs = {};
 const envs = {};
+const fn_states = {};
 const temp_index = {};
 
 function write (subject, predicate, object) {
@@ -43,6 +44,29 @@ function getHash (string, name, type) {
     return hash;
 }
 
+function getFnState (name) {
+
+    if (!fn_states[name]) {
+
+        fn_states[name] = UID();
+
+        write(
+            fn_states[name],
+            rdf_syntax + 'type',
+            'http://schema.jillix.net/vocab/State'
+        );
+
+        // role name
+        write(
+            fn_states[name],
+            'http://schema.org/name',
+            getHash(name)
+        );
+    }
+
+    return fn_states[name];
+}
+
 // create network triple
 const network_id = UID();
 
@@ -58,6 +82,23 @@ write(
     network_id,
     rdf_syntax + 'type',
     '<http://schema.jillix.net/vocab/Network>'
+);
+
+// public role
+const public_role = getHash('*');
+
+// role type
+write(
+    public_role,
+    rdf_syntax + 'type',
+    'http://schema.jillix.net/vocab/Role'
+);
+
+// role name
+write(
+    public_role,
+    'http://schema.org/name',
+    getHash('Public Role')
 );
 
 // Convert composition files to triples
@@ -83,7 +124,30 @@ if (env_config) {
 
     if (env_config.environments) {
         env_config.environments.forEach(env => {
-            envs[env.name] = getHash(JSON.stringify(env.vars), env.name, 'Environment');
+            const env_uid = UID();
+
+            // create json edge
+            write(
+                env_uid,
+                'http://schema.jillix.net/vocab/json',
+                getHash(JSON.stringify(env.vars))
+            );
+
+            // evnironment type
+            write(
+                env_uid,
+                rdf_syntax + 'type',
+                'http://schema.jillix.net/vocab/Environment'
+            );
+
+            // environment name
+            write(
+                env_uid,
+                'http://schema.org/name',
+                getHash(env.name)
+            );
+
+            envs[env.name] = env_uid;
         });
     }
 
@@ -162,7 +226,7 @@ for (let name in states) {
         write(
             sequence_id,
             'http://schema.jillix.net/vocab/role',
-            getHash('*', null, 'Role')
+            public_role
         );
 
         // end event
@@ -223,7 +287,7 @@ for (let name in states) {
                 write(
                     handler_id,
                     'http://schema.jillix.net/vocab/state',
-                    getHash(handler[3], null, 'State') 
+                    getFnState(handler[3])
                 );
 
                 // type data
@@ -274,21 +338,35 @@ for (let name in states) {
                     });
                 }
 
-                let args_hid = getHash(args, "Args:" + handler[2], 'Args');
+                const args_uid = UID();
 
-                // handler args connection
+                // create json edge
                 write(
-                    handler_id,
-                    'http://schema.jillix.net/vocab/args',
-                    args_hid
+                    args_uid,
+                    'http://schema.jillix.net/vocab/json',
+                    getHash(JSON.stringify(args))
+                );
+
+                // args type
+                write(
+                    args_uid,
+                    rdf_syntax + 'type',
+                    'http://schema.jillix.net/vocab/Args'
+                );
+
+                // args name
+                write(
+                    args_uid,
+                    'http://schema.org/name',
+                    getHash("Args:" + handler[2])
                 );
 
                 emits.forEach(emit => {
-                    let key = args_hid + emit;
+                    let key = args_uid + emit;
                     if (!temp_index[key]) {
                         temp_index[key] = 1;
                         write(
-                            args_hid,
+                            args_uid,
                             'http://schema.jillix.net/vocab/sequence',
                             emit
                         );
