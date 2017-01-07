@@ -53,7 +53,7 @@ function getFnState (name) {
         write(
             fn_states[name],
             rdf_syntax + 'type',
-            'http://schema.jillix.net/vocab/State'
+            '<http://schema.jillix.net/vocab/State>'
         );
 
         // role name
@@ -137,7 +137,7 @@ if (env_config) {
             write(
                 env_uid,
                 rdf_syntax + 'type',
-                'http://schema.jillix.net/vocab/Environment'
+                '<http://schema.jillix.net/vocab/Environment>'
             );
 
             // environment name
@@ -340,18 +340,24 @@ for (let name in states) {
 
                 const args_uid = UID();
 
+                write(
+                    handler_id,
+                    'http://schema.jillix.net/vocab/args',
+                    args_uid
+                );
+
                 // create json edge
                 write(
                     args_uid,
                     'http://schema.jillix.net/vocab/json',
-                    getHash(JSON.stringify(args))
+                    getHash(args)
                 );
 
                 // args type
                 write(
                     args_uid,
                     rdf_syntax + 'type',
-                    'http://schema.jillix.net/vocab/Args'
+                    '<http://schema.jillix.net/vocab/Args>'
                 );
 
                 // args name
