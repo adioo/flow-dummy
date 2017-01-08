@@ -13,6 +13,7 @@ const rdf_syntax = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#';
 const hashids = {};
 const hashlbs = {};
 const envs = {};
+const fn_states = {};
 const temp_index = {};
 
 function write (subject, predicate, object) {
@@ -28,11 +29,12 @@ function UID (len) {
     return '_:' + crypto.createHash('md5').update(random).digest('hex');
 }
 
-function getHash (string, name) {
+function getHash (string, name, type) {
     let hash = '_:' + crypto.createHash('md5').update(string).digest('hex');
     if (!hashids[hash]) {
         hashids[hash] = 1;
         write(hash, rdf_syntax + 'string', '"' + string.replace(/"/g, '\\"') + '"');
+        write(hash, rdf_syntax + 'type', '<http://schema.jillix.net/vocab/' + (type || 'Name') + '>');
 
         if (name) {
             write(hash, 'http://schema.org/name', getHash(name));
@@ -42,8 +44,31 @@ function getHash (string, name) {
     return hash;
 }
 
+function getFnState (name) {
+
+    if (!fn_states[name]) {
+
+        fn_states[name] = UID();
+
+        write(
+            fn_states[name],
+            rdf_syntax + 'type',
+            '<http://schema.jillix.net/vocab/State>'
+        );
+
+        // role name
+        write(
+            fn_states[name],
+            'http://schema.org/name',
+            getHash(name)
+        );
+    }
+
+    return fn_states[name];
+}
+
 // create network triple
-const network_id = '_:' + crypto.createHash('md5').update(env_config.network).digest('hex');
+const network_id = UID();
 
 // network name (Service)
 write(
@@ -57,6 +82,23 @@ write(
     network_id,
     rdf_syntax + 'type',
     '<http://schema.jillix.net/vocab/Network>'
+);
+
+// public role
+const public_role = getHash('*');
+
+// role type
+write(
+    public_role,
+    rdf_syntax + 'type',
+    'http://schema.jillix.net/vocab/Role'
+);
+
+// role name
+write(
+    public_role,
+    'http://schema.org/name',
+    getHash('Public Role')
 );
 
 // Convert composition files to triples
@@ -82,7 +124,30 @@ if (env_config) {
 
     if (env_config.environments) {
         env_config.environments.forEach(env => {
-            envs[env.name] = getHash(JSON.stringify(env.vars), env.name);
+            const env_uid = UID();
+
+            // create json edge
+            write(
+                env_uid,
+                'http://schema.jillix.net/vocab/json',
+                getHash(JSON.stringify(env.vars))
+            );
+
+            // evnironment type
+            write(
+                env_uid,
+                rdf_syntax + 'type',
+                '<http://schema.jillix.net/vocab/Environment>'
+            );
+
+            // environment name
+            write(
+                env_uid,
+                'http://schema.org/name',
+                getHash(env.name)
+            );
+
+            envs[env.name] = env_uid;
         });
     }
 
@@ -147,7 +212,7 @@ for (let name in states) {
         write(
             sequence_id,
             'http://schema.org/name',
-            getHash(sequence)
+            getHash(sequence.toUpperCase())
         ); 
 
         // type
@@ -161,7 +226,7 @@ for (let name in states) {
         write(
             sequence_id,
             'http://schema.jillix.net/vocab/role',
-            getHash('*')
+            public_role
         );
 
         // end event
@@ -189,7 +254,7 @@ for (let name in states) {
         seq[0].forEach((handler, index) => {
 
             let handler_id = UID();
-            let handler_name = typeof handler === 'string' ? handler : handler[1] + '/' + handler[2];
+            let handler_name = typeof handler === 'string' ? 'Emit:' + handler : handler[1] + '/' + handler[2];
 
             // name
             write(
@@ -222,7 +287,7 @@ for (let name in states) {
                 write(
                     handler_id,
                     'http://schema.jillix.net/vocab/state',
-                    getHash(handler[3]) 
+                    getFnState(handler[3])
                 );
 
                 // type data
@@ -257,7 +322,7 @@ for (let name in states) {
             );
 
             // method args
-            if (handler[4]) {
+            if (typeof handler !== 'string' && handler[4]) {
                 let args = JSON.stringify(handler[4]);
 
                 // potential emits from args
@@ -273,21 +338,41 @@ for (let name in states) {
                     });
                 }
 
-                let args_hid = getHash(args, "Args:" + handler[2]);
+                const args_uid = UID();
 
-                // handler args connection
                 write(
                     handler_id,
                     'http://schema.jillix.net/vocab/args',
-                    args_hid
+                    args_uid
+                );
+
+                // create json edge
+                write(
+                    args_uid,
+                    'http://schema.jillix.net/vocab/json',
+                    getHash(args)
+                );
+
+                // args type
+                write(
+                    args_uid,
+                    rdf_syntax + 'type',
+                    '<http://schema.jillix.net/vocab/Args>'
+                );
+
+                // args name
+                write(
+                    args_uid,
+                    'http://schema.org/name',
+                    getHash("Args:" + handler[2])
                 );
 
                 emits.forEach(emit => {
-                    let key = args_hid + emit;
+                    let key = args_uid + emit;
                     if (!temp_index[key]) {
                         temp_index[key] = 1;
                         write(
-                            args_hid,
+                            args_uid,
                             'http://schema.jillix.net/vocab/sequence',
                             emit
                         );
