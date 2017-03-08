@@ -67,39 +67,8 @@ function getFnState (name) {
     return fn_states[name];
 }
 
-// create network triple
-const network_id = UID();
-
-// network name (Service)
-write(
-    network_id,
-    'http://schema.org/name',
-    getHash(env_config.network)
-);
-
-// network type
-write(
-    network_id,
-    rdf_syntax + 'type',
-    '<http://schema.jillix.net/vocab/Network>'
-);
-
 // public role
-const public_role = getHash('*');
-
-// role type
-write(
-    public_role,
-    rdf_syntax + 'type',
-    'http://schema.jillix.net/vocab/Role'
-);
-
-// role name
-write(
-    public_role,
-    'http://schema.org/name',
-    getHash('Public Role')
-);
+const public_role = getHash('*', "Public Role", "Role");
 
 // Convert composition files to triples
 files.forEach(file => {
@@ -143,7 +112,7 @@ if (env_config) {
             write(
                 env_uid,
                 rdf_syntax + 'type',
-                '<http://schema.jillix.net/vocab/Environment>'
+                '<http://schema.jillix.net/vocab/Args>'
             );
 
             // environment name
@@ -160,28 +129,7 @@ if (env_config) {
     if (env_config.entrypoints) {
         env_config.entrypoints.forEach(ep => {
 
-            const entrypoint_id = UID();
-
-            // network entrypoint
-            write(
-                network_id,
-                'http://schema.jillix.net/vocab/entrypoint',
-                entrypoint_id
-            );
-
-            // entrypoint name
-            write(
-                entrypoint_id,
-                'http://schema.org/name',
-                getHash(ep.name)
-            );
-
-            // entrypoint type
-            write(
-                entrypoint_id,
-                rdf_syntax + 'type',
-                '<http://schema.jillix.net/vocab/Entrypoint>'
-            );
+            const entrypoint_id = '_:' + crypto.createHash('md5').update(ep.emit).digest('hex');
 
             // entrypoint environment
             if (ep.env) {
@@ -189,19 +137,12 @@ if (env_config) {
                     if (envs[env]) {
                         write(
                             entrypoint_id,
-                            'http://schema.jillix.net/vocab/environment',
+                            'http://schema.jillix.net/vocab/args',
                             envs[env]
                         );
                     }
                 });
             }
-
-            // entrypoint sequence
-            write(
-                entrypoint_id,
-                'http://schema.jillix.net/vocab/sequence',
-                '_:' + crypto.createHash('md5').update(ep.emit).digest('hex')
-            );
         });
     }
 }
@@ -249,7 +190,7 @@ for (let sequence in sequences) {
     if (seq[1]) {
         write(
             sequence_id,
-            'http://schema.jillix.net/vocab/onError',
+            'http://schema.jillix.net/vocab/error',
             '_:' + crypto.createHash('md5').update(seq[1]).digest('hex')
         );
     }
