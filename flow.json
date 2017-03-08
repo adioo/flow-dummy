@@ -1,0 +1,88 @@
+{
+    "network": "TestNetwork",
+    "environments": [
+        {
+            "name": "server",
+            "vars": { 
+                "token_duration": 600000,
+                "token_secret": "ccd555f2e927ca4a8b9c5b6ff96aa2eac0b441df2dc385b9e8000229d4cbdf791ac47fd8e7eb6ae2d68308dd845efa9d067722fe653e06bfe3578ab93a8bb057",
+                "cookieName": "SES", 
+                "requestKey": "session",
+                "session_secret": "99ae3dd16be45cc847153fd33df0269e57c6eeec356eebaf8eaf82b816b494b88ba312dfa4b14a7e4a4ce69884b785588a70db31dc85827936533f8961c56f2d", 
+                "session_duration": 86400000,
+                "activeDuration": 1800000,
+                "cookie": {
+                    "ephemeral": true, 
+                    "httpOnly": true,
+                    "secure": true
+                }
+            }
+        }, 
+        {
+            "name": "flow-api",
+            "vars": {
+                "FlowApiStore": {
+                    "store": "cayley",
+                    "config": "http://localhost:64210/"
+                },
+                "port": 8080,
+                "ssl": {
+                    "cert": "/home/adioo/Repos/service/ssl/dev.crt",
+                    "key": "/home/adioo/Repos/service/ssl/dev.key"
+                }
+            }
+        },
+        {
+            "name": "static",
+            "vars": {
+                "port": 8000,
+                "ssl": {
+                    "cert": "/home/adioo/Repos/service/ssl/dev.crt",
+                    "key": "/home/adioo/Repos/service/ssl/dev.key"
+                },
+                "entrypoints": {
+                    "localhost:8000": "public/markup/index.html",
+                    "schema.jillix.net:8000": "public/markup/index.html",
+                    "jillix.com": "public/markup/index.html"
+                }
+            }
+        },
+        {
+            "name": "urls-dev",
+            "vars": {
+                "browser": {
+                    "api_url": "https://localhost:8080/",
+                    "event": "https://localhost:8080/sequence/",
+                    "module": "https://localhost:8000/module/",
+                    "role": "_:3389dae361af79b04c9c8e7057f60cc6"
+                },
+                "cors": {
+                    "api": "https://localhost:8080",
+                    "static": "https://localhost:8000"
+                }
+            }
+        },
+        {
+            "name": "urls-test",
+            "vars": {
+                "production": true,
+                "browser": {
+                    "api_url": "https://schema.jillix.net:8080/",
+                    "event": "https://schema.jillix.net:8080/sequence/",
+                    "module": "https://schema.jillix.net:8000/module/",
+                    "role": "_:3389dae361af79b04c9c8e7057f60cc6"
+                },
+                "cors": {
+                    "api": "https://schema.jillix.net:8080",
+                    "static": "https://schema.jillix.net:8000"
+                }
+            }
+        }
+    ],
+    "entrypoints": [
+        {
+            "emit": "dummyApp",
+            "env": ["server", "flow-api", "urls-dev"]
+        }
+    ]
+}

@@ -1,5 +1,5 @@
 {
     "dummyApp": [[
-        ["adioo", "flow-dummy/flow", "test", {"some": "args"}]
+        ["adioo", "flow-dummy", "test", {"some": "args"}]
     ]]
 }
