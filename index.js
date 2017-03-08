@@ -1,20 +1,16 @@
 const Transform = require('stream').Transform;
-const util = require('util');
+const inspect = require('util').inspect;
 
-exports.data = function (scope, state, args, chunk, next) {
-    //console.log('Dummy.data:', this._name, chunk);
-    next(null, chunk);
-    //next(new Error('Hello, Error!'));
-};
+module.exports = (event, state, args, next) => {
 
-exports.stream = function (args, stream) {
-    const self = this;
-    return new Transform({
-        objectMode: args.objectMode !== undefined ? args.objectMode : true,
-        transform: (chunk, enc, next) => {
-            console.log('Dummy.stream.data:', self._name, chunk);
-            next(null, chunk);
-            //next(new Error('Hello, Error!'));
+    inspect(event.data);
+
+    const logger = new Transfrom({
+        transform: (chunk, enc, done) => {
+            inspect(chunk);
+            done(null, chunk);
         }
     });
+
+    next(null, event.data, event.output.pipe(logger));
 };
