@@ -1,14 +1,20 @@
 const Transform = require('stream').Transform;
 const inspect = require('util').inspect;
 
-module.exports = (event, state, args, next) => {
+exports.test = (event, state, args, next) => {
 
-    inspect(event.data);
+    process.stdout.write("Please enter a number to multiply: ");
 
-    const logger = new Transfrom({
+    const logger = new Transform({
         transform: (chunk, enc, done) => {
-            inspect(chunk);
-            done(null, chunk);
+            let value = parseInt(chunk.toString());
+            if (!isNaN(value)) {
+                value = value * value;
+            } else {
+                value = "Can not multiply ignorance!";
+            }
+
+            done(null, "Result: " + value + "\nNext number: ");
         }
     });
 
