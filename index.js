@@ -18,5 +18,5 @@ exports.test = (event, state, args, next) => {
         }
     });
 
-    next(null, event.data, event.output.pipe(logger));
+    next(null, null, event.pipe(logger));
 };
