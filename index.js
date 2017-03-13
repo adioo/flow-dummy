@@ -1,20 +1,22 @@
 const Transform = require('stream').Transform;
-const util = require('util');
+const inspect = require('util').inspect;
 
-exports.data = function (scope, state, args, chunk, next) {
-    //console.log('Dummy.data:', this._name, chunk);
-    next(null, chunk);
-    //next(new Error('Hello, Error!'));
-};
+exports.test = (event, state, args, next) => {
 
-exports.stream = function (args, stream) {
-    const self = this;
-    return new Transform({
-        objectMode: args.objectMode !== undefined ? args.objectMode : true,
-        transform: (chunk, enc, next) => {
-            console.log('Dummy.stream.data:', self._name, chunk);
-            next(null, chunk);
-            //next(new Error('Hello, Error!'));
+    process.stdout.write("Please enter a number to multiply: ");
+
+    const logger = new Transform({
+        transform: (chunk, enc, done) => {
+            let value = parseInt(chunk.toString());
+            if (!isNaN(value)) {
+                value = value * value;
+            } else {
+                value = "Can not multiply ignorance!";
+            }
+
+            done(null, "Result: " + value + "\nNext number: ");
         }
     });
+
+    next(null, null, event.pipe(logger));
 };
