@@ -1,9 +1,8 @@
+"use strict"
+
 const Transform = require('stream').Transform;
-const inspect = require('util').inspect;
 
-exports.test = (event, state, args, next) => {
-
-    process.stdout.write("Please enter a number to multiply: ");
+exports.multiplyMe = () => {
 
     const logger = new Transform({
         transform: (chunk, enc, done) => {
@@ -18,5 +17,5 @@ exports.test = (event, state, args, next) => {
         }
     });
 
-    next(null, null, event.pipe(logger));
+    return logger;
 };
