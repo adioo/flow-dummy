@@ -1,6 +1,6 @@
 [
     [
-        ["adioo/flow-dummy/v0.1.0/test", null, {"some":"args"}]
+        ["ottiker/flow-dummy/v0.1.0/test", null, {"some":"args"}]
     ],
     {
         "A": {"seq": "args"},
